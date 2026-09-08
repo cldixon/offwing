@@ -131,11 +131,11 @@ export function verifyPage(
       ${published
         ? html`<div class="verdict ok">
             <h2>Published</h2>
-            <p class="mono" style="word-break:break-all">${published}</p>
+            <p class="mono wrap">${published}</p>
             <p>It is in your repository now. The issuer cannot remove it.</p>
           </div>`
         : ''}
-      <div class="card" style="padding:1.15rem">${form}</div>`,
+      <div class="card pad">${form}</div>`,
       mode,
       chrome,
     )
@@ -177,18 +177,18 @@ export function verifyPage(
     </div>
 
     ${published
-      ? html`<div class="verdict ok" style="margin-top:1rem">
+      ? html`<div class="verdict ok mt">
           <h2>Published</h2>
-          <p class="mono" style="word-break:break-all">${published}</p>
+          <p class="mono wrap">${published}</p>
           <p>
             It is in your repository now. The issuer cannot remove it.
           </p>
         </div>`
       : vouch
-        ? html`<form method="post" action="/attest" class="card" style="margin-top:1rem">
+        ? html`<form method="post" action="/attest" class="card mt">
             <input type="hidden" name="subjectUri" value="${vouch.subjectUri}">
             <input type="hidden" name="subjectCid" value="${vouch.subjectCid}">
-            <h2 style="margin-top:0">Say so in public</h2>
+            <h2 class="mt0">Say so in public</h2>
             <p class="sub">
               Publishes a record in ${vouch.actor}&rsquo;s repository saying
               this document checked out. It names no findings and carries no
@@ -198,7 +198,7 @@ export function verifyPage(
           </form>`
         : report.verified
           ? ''
-          : html`<div class="meta" style="margin-top:1rem">
+          : html`<div class="meta mt">
               There is nothing to publish. A document that fails to recompute
               proves only that some document fails, and anyone can produce one,
               so a failed check is not evidence to anybody but you. Take it up
@@ -234,7 +234,7 @@ export function verifyPage(
       : ''}
 
     <h2>Verify another</h2>
-    <div class="card" style="padding:1.15rem">${form}</div>`,
+    <div class="card pad">${form}</div>`,
     mode,
     chrome,
   )
@@ -354,7 +354,7 @@ export function partPage(params: {
         const checks = attestations.get(r.cid) ?? []
         return html`<div class="link">
           <div class="rail"><div class="dot"></div>${i < chain.length - 1 ? html`<div class="line"></div>` : ''}</div>
-          <div class="body" style="flex:1">
+          <div class="body grow">
             <div class="title">
               ${avatar(r.organizationName, true)}
               <a href="${postPath(r.uri)}">${r.organizationName}</a>
@@ -440,17 +440,20 @@ export function dashboardPage(params: {
       ${params.issuers.length === 0
         ? html`<div class="empty">No issuers observed yet.</div>`
         : html`<table>
-            <tr><th>Issuer</th><th>Releases</th><th>Independently checked</th></tr>
-            ${params.issuers.map(
-              (s) => html`<tr>
-                <td><a href="${profilePath(s.did, params.handles)}" title="${s.did}"
-                  >${nameParty(s.did, params.names, params.handles, 12)}</a></td>
-                <td>${s.releases}</td>
-                <td>
+            <tr><th>Issuer</th><th class="num">Releases</th><th class="num">Independently checked</th></tr>
+            ${params.issuers.map((s) => {
+              const name = nameParty(s.did, params.names, params.handles, 12)
+              return html`<tr>
+                <td><div class="who">
+                  ${avatar(name, true)}
+                  <a href="${profilePath(s.did, params.handles)}" title="${s.did}">${name}</a>
+                </div></td>
+                <td class="num">${s.releases}</td>
+                <td class="num ${s.attested === 0 ? 'none' : 'pass'}">
                   ${s.attested === 0 ? '—' : `${s.attested} of ${s.releases}`}
                 </td>
-              </tr>`,
-            )}
+              </tr>`
+            })}
           </table>`}
     </div>`,
     params.mode,
@@ -507,7 +510,7 @@ export function disclosePage(params: {
       ${params.error
         ? html`<div class="verdict no"><h2>Could not build that</h2><p>${params.error}</p></div>`
         : ''}
-      <div class="card" style="padding:1.15rem">${form}</div>`,
+      <div class="card pad">${form}</div>`,
       params.mode,
       params.chrome,
     )
@@ -548,7 +551,7 @@ export function disclosePage(params: {
     <div class="card">
       <div class="empty">
         ${(r?.withheld ?? []).map(fieldLabel).join(' · ')}
-        <p style="margin:.6rem 0 0">
+        <p class="mb mt0">
           The verifier is told which fields exist and were not shown, so a
           flattering subset cannot pass as the whole form.
         </p>
@@ -561,7 +564,7 @@ export function disclosePage(params: {
         ${params.exposed?.length ?? 0} sibling hashes travel with the proof —
         they are how the root is recomputed. Each covers a field salted with 32
         random bytes, so none can be reversed.
-        <div class="evidence mono" style="margin-top:.5rem">
+        <div class="evidence mono">
           ${(params.exposed ?? []).map((h) => `${h.slice(0, 16)}…`).join('  ')}
         </div>
       </div>
@@ -572,12 +575,12 @@ export function disclosePage(params: {
       This is what you hand over. Search it for the findings or the customer —
       they are not in it.
     </p>
-    <div class="card" style="padding:1.15rem">
+    <div class="card pad">
       <textarea readonly>${JSON.stringify(d, null, 2)}</textarea>
     </div>
 
     <h2>Build another</h2>
-    <div class="card" style="padding:1.15rem">${form}</div>`,
+    <div class="card pad">${form}</div>`,
     params.mode,
     params.chrome,
   )
@@ -647,6 +650,8 @@ export function dataplate(params: {
   /** Suppresses the part-history link, for use inside another anchor. */
   flat?: boolean
   small?: boolean
+  /** Whatever ends the identifier row: a CHECKED pill, a review button. */
+  trail?: HtmlEscapedString | Promise<HtmlEscapedString> | ''
 }) {
   const { description, partNumber, serialNumber } = params
   const partHref = `/part/${encodeURIComponent(partNumber)}/${encodeURIComponent(serialNumber)}`
@@ -664,6 +669,7 @@ export function dataplate(params: {
           : html`<a href="${partHref}">${partNumber}</a>`}
       </dd></div>
       <div><dt>S/N</dt><dd class="mono">${serialNumber}</dd></div>
+      ${params.trail ? html`<div class="trail">${params.trail}</div>` : ''}
     </dl>
   </div>`
 }
@@ -739,7 +745,7 @@ export function feedCard(
              name the issuer committed to on this document, and it is the one
              that would have to change for the commitment to break. -->
         ${named(r.issuerDid, r.organizationName)}${yours(r.issuerDid)}
-        issued a release certificate
+        <span class="verb">issued a release certificate</span>
         <span class="when"><a href="${postPath(r.uri)}"
           >${ago(r.completedAt, now)}</a></span>
       </div>
@@ -748,11 +754,12 @@ export function feedCard(
         partNumber: r.partNumber,
         serialNumber: r.serialNumber,
         href: postPath(r.uri),
+        trail:
+          n > 0
+            ? html`<a class="pill" href="${postPath(r.uri)}"
+                title="Independently checked by ${n}">Checked ×${n}</a>`
+            : '',
       })}
-      ${n > 0
-        ? html`<div class="meta"><a href="${postPath(r.uri)}"
-            >checked by ${n}</a></div>`
-        : ''}
     </article>`
   }
 
@@ -771,7 +778,7 @@ export function feedCard(
   return html`<article class="event attested" data-cid="${t.cid}">
     <div class="who">
       ${avatar(nameOf(t.verifierDid), true)}
-      ${byline(t.verifierDid)} accepted this certificate
+      ${byline(t.verifierDid)} <span class="verb">accepted this certificate</span>
       <span class="when"><a href="${postPath(t.subjectUri)}"
         >${ago(t.verifiedAt, now)}</a></span>
     </div>
@@ -1212,21 +1219,19 @@ export function inboxPage(params: {
               (a) => html`<article class="event">
                 <div class="who">
                   ${avatar(a.issuerName, true)}
-                  <strong>${a.issuerName}</strong> released a part to you
+                  <strong>${a.issuerName}</strong>
+                  <span class="verb">released a part to you</span>
                   <span class="when">${ago(a.at, now)}</span>
                 </div>
-                <div class="what">
-                  <a href="${postPath(a.subject.uri)}">${a.description}</a>
-                  · <a class="mono tag"
-                      href="/part/${encodeURIComponent(a.partNumber)}/${encodeURIComponent(a.serialNumber)}"
-                    >${a.partNumber}</a>
-                  · s/n <span class="mono">${a.serialNumber}</span>
-                </div>
-                <div class="checkrow">
-                  <a class="button"
+                ${dataplate({
+                  description: a.description,
+                  partNumber: a.partNumber,
+                  serialNumber: a.serialNumber,
+                  href: postPath(a.subject.uri),
+                  trail: html`<a class="button ghost"
                     href="/inbox/scan?uri=${encodeURIComponent(a.subject.uri)}"
-                    >Review the paperwork</a>
-                </div>
+                    >Review the paperwork &rarr;</a>`,
+                })}
               </article>`,
             )}
           </div>`}`
@@ -2065,8 +2070,8 @@ export function issueBody(params: {
         or anybody else.
       </div>
 
-      <div class="card" style="padding:1.15rem">
-        <div class="detail mono" style="word-break:break-all">${params.issued.uri}</div>
+      <div class="card pad">
+        <div class="detail mono wrap">${params.issued.uri}</div>
         <label for="out">The document — save this, it cannot be reconstructed</label>
         <textarea id="out" readonly data-uri="${params.issued.uri}"
           >${JSON.stringify(params.issued.bundle, null, 2)}</textarea>
@@ -2089,7 +2094,7 @@ export function issueBody(params: {
     </p>
 
     ${params.error
-      ? html`<div class="verdict no" style="margin:1rem 0"><h2>Could not release</h2><p>${params.error}</p></div>`
+      ? html`<div class="verdict no mt"><h2>Could not release</h2><p>${params.error}</p></div>`
       : ''}
 
     <form method="post" action="/issue" class="draftform">
@@ -2194,7 +2199,7 @@ function block(params: {
 
   const shown = params.known
     ? params.value === '' || params.value === null || params.value === undefined
-      ? html`<span class="v" style="color:var(--muted)">— left blank —</span>`
+      ? html`<span class="v muted">— left blank —</span>`
       : html`<span class="v">${String(params.value)}</span>`
     : html`<span class="v">withheld</span>
         ${params.leaf ? html`<span class="leafhash">${params.leaf}</span>` : ''}`
@@ -2246,16 +2251,16 @@ export function formPage(params: FormPageParams) {
       <div class="capt">${isConformity ? 'Block 13a — Certifies conformity' : 'Block 14a — Approval for return to service'}</div>
       <div class="stmt ${active ? 'on' : ''}">
         ${unknown
-          ? html`<em style="color:var(--muted)">withheld — which column certifies is not on the public record</em>`
+          ? html`<em class="muted">withheld — which column certifies is not on the public record</em>`
           : active
             ? CERT_STATEMENTS[basis] ?? basis
-            : html`<span style="color:var(--muted)">not used</span>`}
+            : html`<span class="muted">not used</span>`}
       </div>
       ${active || unknown
         ? html`${blk('signerCert')}${blk('signerName')}`
-        : html`<div class="blk" style="cursor:default">
+        : html`<div class="blk static">
             <span class="n">Blocks ${isConformity ? '13c / 13d' : '14c / 14d'}</span>
-            <span class="v" style="color:var(--muted)">—</span>
+            <span class="v muted">—</span>
           </div>`}
     </div>`
   }
@@ -2287,10 +2292,10 @@ export function formPage(params: FormPageParams) {
     <h3>The record, as published</h3>
     ${recordJson
       ? html`<pre class="rec">${recordJson}</pre>`
-      : html`<div class="body" style="color:var(--muted);font-size:.88rem">
+      : html`<div class="body muted small">
           Could not be fetched: ${params.fetchError ?? 'unknown reason'}
         </div>`}
-    <div class="body" style="border-top:1px solid var(--line);font-size:.8rem;color:var(--muted)">
+    <div class="body foot">
       Nine of the seventeen blocks travel here. The rest are committed to and
       withheld — the commitment covers the whole form either way.
     </div>
@@ -2300,14 +2305,14 @@ export function formPage(params: FormPageParams) {
     <h3>The commitment</h3>
     <div class="body">
       ${params.root
-        ? html`<div class="mono" style="word-break:break-all;font-size:.72rem">
-            <span style="color:var(--muted)">root</span> ${params.root}
+        ? html`<div class="mono wrap xs">
+            <span class="muted">root</span> ${params.root}
           </div>`
-        : html`<span style="color:var(--muted)">no commitment available</span>`}
+        : html`<span class="muted">no commitment available</span>`}
 
       ${params.leaves && params.pad
         ? html`
-            <div style="margin:.8rem 0 .35rem;font-size:.72rem;color:var(--muted)">
+            <div class="tree-note">
               32 leaves — 17 fields, then the constant pad
             </div>
             <div class="leaves">
@@ -2323,7 +2328,7 @@ export function formPage(params: FormPageParams) {
             </div>
             ${params.fold && params.fold.length > 0
               ? html`<div class="fold">
-                  <div style="color:var(--muted);font-size:.72rem;margin-bottom:.3rem">
+                  <div class="lead">
                     Folding ${fieldLabel(params.selected ?? '')} to the root
                   </div>
                   ${params.fold.map(
@@ -2333,15 +2338,15 @@ export function formPage(params: FormPageParams) {
                   )}
                   <div class="root">
                     ${params.fold[params.fold.length - 1]!.hash === params.root
-                      ? html`<span style="color:var(--pass)">✓ identical to the published root</span>`
-                      : html`<span style="color:var(--fail)">✗ does not reach the published root</span>`}
+                      ? html`<span class="c-pass">✓ identical to the published root</span>`
+                      : html`<span class="c-fail">✗ does not reach the published root</span>`}
                   </div>
                 </div>`
-              : html`<div style="margin-top:.7rem;font-size:.8rem;color:var(--muted)">
+              : html`<div class="tree-hint">
                   Choose a block above to fold its leaf up to the root.
                 </div>`}
           `
-        : html`<div class="inert" style="margin-top:.8rem">
+        : html`<div class="inert mt">
             <strong>You cannot open a leaf from the commitment.</strong>
             It is one-way and inert — not a container, an index, or something
             you can expand. Its only ability is to answer yes or no to a claim
@@ -2370,7 +2375,7 @@ export function formPage(params: FormPageParams) {
     <h1>Release certificate</h1>
     <p class="sub">
       ${params.issuerHandle ? html`Issued by <strong>${params.issuerHandle}</strong> · ` : ''}
-      <span class="mono" style="font-size:.8rem">${params.uri}</span>
+      <span class="mono small">${params.uri}</span>
     </p>
 
     ${params.fetchError
@@ -2401,7 +2406,7 @@ export function formPage(params: FormPageParams) {
     <input type="hidden" name="bundle" value="${params.bundleEcho ?? ''}">
     ${sheet}
 
-    <p class="sub" style="margin:.9rem 0 1.5rem;font-size:.85rem">
+    <p class="sub small mt">
       Click any block to fold its leaf up to the published root.
       ${haveBundle
         ? ''
@@ -2413,7 +2418,7 @@ export function formPage(params: FormPageParams) {
     </form>
 
     <h2>${haveBundle ? 'Open a different bundle' : 'Open it with a bundle'}</h2>
-    <p class="sub" style="margin-bottom:.75rem">
+    <p class="sub mb">
       The bundle is what travels with the part: all seventeen values and all
       seventeen nonces. It is recomputed and discarded — no AppView stores one.
     </p>

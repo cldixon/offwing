@@ -954,7 +954,7 @@ describe('the feed over a production-shaped index', () => {
   test('a station record still gives the receiver its display name', async () => {
     const { app } = await liveShaped({ handle: `example-air.${DOMAIN}`, name: 'Example Air' })
     const who = card(await (await app.request('/')).text())
-    assert.match(who, /Example Air<\/strong><\/a> accepted this certificate/)
+    assert.match(who, /Example Air<\/strong><\/a> <span class="verb">accepted this certificate/)
   })
 
   /**

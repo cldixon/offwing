@@ -1,0 +1,1110 @@
+/*
+ * OffWing component styles.
+ *
+ * Everything here is written in terms of the tokens in tokens.css and nothing
+ * else: no literal colours, typefaces, sizes or radii. If a value you need is
+ * missing, add a token rather than a number.
+ *
+ * The sheet is inlined into every page by shell.ts, so a page is still one
+ * request. The comments explain decisions rather than declarations; the
+ * declarations say what they do.
+ */
+
+/* ------------------------------------------------------------------- base */
+
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--fg);
+  font: var(--w-regular) var(--fs-16)/var(--lh-body) var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--accent-ink); }
+:focus-visible { outline: var(--focus-w) solid var(--accent-rule); outline-offset: var(--focus-offset); }
+
+/* Display type is for headings, the brand, the primary action and count
+   figures. It is never used for part names, body copy or table cells: those
+   are things a reader has to read, and condensed capitals are for things a
+   reader only has to recognise. */
+h1, .t-display {
+  font: var(--w-bold) var(--fs-40)/var(--lh-tight) var(--font-display);
+  text-transform: uppercase; letter-spacing: var(--track-display);
+  margin: 0 0 var(--s-2);
+}
+/* A section heading inside a page: a mono label, quieter than the title. */
+h2, .sect {
+  font: var(--w-bold) var(--fs-12)/var(--lh-body) var(--font-mono);
+  text-transform: uppercase; letter-spacing: var(--track-label-wide);
+  color: var(--muted); margin: var(--s-7) 0 var(--s-2);
+}
+.sub { color: var(--sub); font-size: var(--fs-15); margin: 0 0 1.75rem; }
+code, .mono { font-family: var(--font-mono); font-size: .875em; }
+
+/* Small labels — badges, chips, timestamps, table headers, facts — share one
+   voice: mono, small, tracked, usually uppercase. */
+.t-label {
+  font-family: var(--font-mono); font-size: var(--fs-11); font-weight: var(--w-bold);
+  letter-spacing: var(--track-label); text-transform: uppercase;
+}
+
+/* Utilities for the handful of places a template needs one adjustment and a
+   dedicated class would name nothing. */
+.muted { color: var(--muted); }
+.c-pass { color: var(--pass); }
+.c-fail { color: var(--fail); }
+.small { font-size: var(--fs-13); }
+.xs { font-size: var(--fs-12); }
+.wrap { word-break: break-all; }
+.grow { flex: 1; }
+.mt { margin-top: var(--s-4); }
+.mt0 { margin-top: 0; }
+.mb { margin-bottom: var(--s-3); }
+.card.pad { padding: var(--card-pad); }
+
+/* The one standing admonition, in the chrome rather than on every page.
+   There used to be three or four before any content; a warning repeated that
+   often is read as furniture and stops working. */
+.marker {
+  background: var(--warn-bg); border-bottom: var(--bw) solid var(--line);
+  font-size: var(--fs-13); color: var(--sub); text-align: center;
+  padding: .45rem var(--gutter);
+}
+.marker strong { color: var(--fg); }
+
+/* ------------------------------------------------------------------- feed */
+
+.feed { display: flex; flex-direction: column; gap: var(--feed-gap); }
+.event {
+  background: var(--card); border: var(--bw) solid var(--line); border-radius: var(--r-card);
+  padding: var(--card-pad);
+}
+.event .who {
+  font-size: var(--fs-15); display: flex; align-items: center; gap: var(--s-2);
+  flex-wrap: wrap;
+}
+.event .who strong { font-weight: var(--w-semibold); }
+.event .who .verb { color: var(--sub); }
+.event .who .when {
+  margin-left: auto; color: var(--muted); font-family: var(--font-mono);
+  font-size: var(--fs-12); white-space: nowrap;
+}
+.event .dot { width: var(--s-2); height: var(--s-2); border-radius: var(--r-pill); background: var(--accent-rule); flex: 0 0 auto; }
+/* YOU: the one chip that sits on the yellow surface. */
+.event .mine {
+  font: var(--w-bold) var(--fs-10)/1.6 var(--font-mono); text-transform: uppercase;
+  background: var(--accent); color: var(--accent-fg); border-radius: var(--r-chip);
+  padding: 0 .375rem;
+}
+.event .note {
+  margin-top: var(--s-2); padding: var(--s-2) var(--s-3); border-radius: var(--r-inner);
+  background: var(--skip-bg); font-size: var(--fs-14); color: var(--fg);
+}
+.event .meta { margin-top: var(--s-2); font-size: var(--fs-12); color: var(--muted); }
+@keyframes arrive { from { opacity: 0; transform: translateY(-.4rem); } to { opacity: 1; transform: none; } }
+.event.fresh { animation: arrive var(--dur) var(--ease); }
+
+/* A pass-coloured pill: "CHECKED ×N" on a release, the live-stream pulse. */
+.pill, .pulse {
+  display: inline-block; font: var(--w-bold) var(--fs-11)/1.7 var(--font-mono);
+  letter-spacing: var(--track-label); text-transform: uppercase; white-space: nowrap;
+  color: var(--pass); border: var(--bw) solid var(--pass); border-radius: var(--r-inner);
+  padding: 0 var(--s-2); text-decoration: none;
+}
+.pill:hover { background: var(--pass-bg); }
+.pulse { margin-left: var(--s-2); }
+.pulse.beat { background: var(--pass-bg); }
+/* Paused or idle: the stream is closed, so the generator has no viewer and
+   is writing nothing. Saying which is honest — a still feed with no
+   explanation reads as broken. */
+.pulse.idle { color: var(--muted); border-color: var(--line); }
+.card { background: var(--card); border: var(--bw) solid var(--line); border-radius: var(--r-card); }
+.demo {
+  background: var(--skip-bg); border: var(--bw) solid var(--line);
+  border-left: var(--bw-rule) solid var(--accent-rule);
+  padding: var(--s-3) var(--s-4); border-radius: var(--r-card); font-size: var(--fs-14);
+  margin-bottom: var(--s-6);
+}
+
+/* ---------------------------------------------------- verification stages */
+
+.verdict {
+  padding: var(--card-pad); border-radius: var(--r-card); margin-bottom: var(--s-5);
+  border: var(--bw) solid var(--line);
+}
+.verdict.ok { background: var(--pass-bg); border-left: var(--bw-rule) solid var(--pass); }
+.verdict.no { background: var(--fail-bg); border-left: var(--bw-rule) solid var(--fail); }
+/* A verdict's heading is a title, not a section label. */
+.verdict h2, .mismatch h2, .t-title {
+  font: var(--w-bold) var(--fs-20)/var(--lh-tight) var(--font-display);
+  text-transform: uppercase; letter-spacing: var(--track-display);
+  color: var(--fg); margin: 0 0 var(--s-1);
+}
+.verdict p { margin: 0; color: var(--sub); font-size: var(--fs-14); }
+
+.stage { display: flex; gap: var(--s-4); padding: var(--s-3) 1.125rem; border-bottom: var(--bw) solid var(--line); }
+.stage:last-child { border-bottom: 0; }
+.stage .badge {
+  flex: 0 0 auto; width: 4.4rem; text-align: center; align-self: flex-start;
+  font: var(--w-bold) var(--fs-11)/1.7 var(--font-mono);
+  letter-spacing: var(--track-label); text-transform: uppercase;
+  padding: .1rem 0; border-radius: var(--r-inner);
+}
+.badge.pass { color: var(--pass); background: var(--pass-bg); }
+.badge.fail { color: var(--fail); background: var(--fail-bg); }
+.badge.warn { color: var(--warn); background: var(--warn-bg); }
+.badge.skipped { color: var(--skip); background: var(--skip-bg); }
+.stage .body { min-width: 0; }
+.stage .title { font-weight: var(--w-semibold); font-size: var(--fs-15); }
+.stage .detail { color: var(--sub); font-size: var(--fs-14); margin-top: .12rem; }
+.stage .evidence {
+  margin-top: var(--s-2); font-family: var(--font-mono); font-size: var(--fs-12);
+  color: var(--muted); word-break: break-all;
+}
+
+/* the lesson: a real signature over a document that has since changed */
+.contrast {
+  margin-top: var(--s-5); padding: var(--card-pad); border-radius: var(--r-card);
+  background: var(--fail-bg); border: var(--bw) dashed var(--fail); font-size: var(--fs-14);
+}
+.contrast strong { color: var(--fail); }
+
+/* --------------------------------------------------------------- timeline */
+
+.link { display: flex; gap: var(--s-4); padding: var(--s-4) 1.125rem; border-bottom: var(--bw) solid var(--line); }
+.link:last-child { border-bottom: 0; }
+.link .rail { flex: 0 0 auto; width: .6rem; display: flex; flex-direction: column; align-items: center; }
+.link .dot { width: .6rem; height: .6rem; border-radius: var(--r-pill); background: var(--accent-rule); margin-top: .45rem; }
+.link .line { flex: 1; width: var(--bw); background: var(--line); }
+.link .title { display: flex; align-items: center; gap: .45rem; }
+.times { display: flex; gap: 1.75rem; margin-top: var(--s-2); flex-wrap: wrap; }
+.times div { font-family: var(--font-mono); font-size: var(--fs-13); }
+.times .label {
+  color: var(--muted); text-transform: uppercase; letter-spacing: var(--track-label);
+  font-size: var(--fs-11); font-weight: var(--w-bold);
+}
+.gap {
+  background: var(--fail-bg); border: var(--bw) dashed var(--fail); border-radius: var(--r-card);
+  padding: var(--card-pad); margin-top: var(--s-4); font-size: var(--fs-14);
+}
+
+/* ------------------------------------------------------------------ table */
+
+table { width: 100%; border-collapse: collapse; font-size: var(--fs-14); }
+th {
+  text-align: left; font: var(--w-bold) var(--fs-11)/var(--lh-body) var(--font-mono);
+  text-transform: uppercase; letter-spacing: var(--track-label); color: var(--muted);
+  padding: var(--s-3) 1.125rem; border-bottom: var(--bw) solid var(--line);
+}
+td { padding: .7rem 1.125rem; border-bottom: var(--bw) solid var(--line); }
+tr:last-child td { border-bottom: 0; }
+/* Figures line up on the right in mono; a dash where there is no figure. */
+td.num { text-align: right; font-family: var(--font-mono); font-size: var(--fs-14); white-space: nowrap; }
+th.num { text-align: right; }
+td.num.pass { color: var(--pass); }
+td.num.none { color: var(--muted); }
+td .who { display: flex; align-items: center; gap: var(--s-2); }
+td .who a { color: inherit; text-decoration: none; font-weight: var(--w-semibold); }
+td .who a:hover { text-decoration: underline; text-decoration-color: var(--accent-rule); }
+.scroll { overflow-x: auto; }
+
+/* ------------------------------------------------------------------ forms */
+
+textarea {
+  width: 100%; min-height: 11rem; font-family: var(--font-mono); font-size: var(--fs-13);
+  padding: var(--s-3); border: var(--bw) solid var(--line); border-radius: var(--r-card);
+  background: var(--card); color: var(--fg);
+}
+input[type=text] {
+  padding: var(--s-2) .65rem; border: var(--bw) solid var(--line); border-radius: var(--r-card);
+  background: var(--card); color: var(--fg); font: inherit; font-size: var(--fs-14);
+  width: 100%; max-width: 22rem;
+}
+label { display: block; font-size: var(--fs-13); color: var(--muted); margin: var(--s-4) 0 .3rem; }
+select {
+  padding: var(--s-2) .65rem; border: var(--bw) solid var(--line); border-radius: var(--r-card);
+  background: var(--card); color: var(--fg); font: inherit; font-size: var(--fs-14);
+  max-width: 22rem; width: 100%;
+}
+
+/* The primary action. Display type on the yellow surface (ink on light). */
+button, a.button {
+  display: inline-block; margin-top: var(--s-5); padding: .75rem 1.125rem;
+  font: var(--w-bold) var(--fs-16)/var(--lh-tight) var(--font-display);
+  text-transform: uppercase; letter-spacing: var(--track-cta); text-align: center;
+  border: 0; border-radius: var(--r-card); background: var(--cta-bg); color: var(--cta-fg);
+  cursor: pointer; text-decoration: none;
+}
+button:hover, a.button:hover { filter: brightness(1.06); }
+button:disabled { background: var(--line); color: var(--muted); cursor: not-allowed; filter: none; }
+a.button { margin-top: 0; }
+/* The secondary action: a mono label in a hairline box. Neutral by default;
+   `.accent` for the one that leads somewhere ("Review paperwork"). */
+.ghost, button.ghost, a.button.ghost {
+  margin: 0; background: none; color: var(--sub); border: var(--bw) solid var(--line);
+  font: var(--w-bold) var(--fs-12)/var(--lh-body) var(--font-mono);
+  text-transform: uppercase; letter-spacing: var(--track-label);
+  padding: .375rem .75rem; border-radius: var(--r-inner); cursor: pointer;
+  text-decoration: none; display: inline-block;
+}
+.ghost:hover, button.ghost:hover, a.button.ghost:hover { background: var(--skip-bg); filter: none; }
+a.button.ghost, .ghost.accent { color: var(--accent-ink); border-color: var(--accent-ink); }
+
+.empty { padding: var(--s-6) 1.125rem; color: var(--muted); font-size: var(--fs-14); }
+.checks { display: grid; grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr)); gap: .3rem var(--s-3); margin-top: var(--s-2); }
+.check { display: flex; align-items: center; gap: var(--s-2); margin: 0; font-size: var(--fs-14); color: var(--fg); }
+.check input { margin: 0; }
+.hint {
+  font: var(--w-bold) var(--fs-11)/1.7 var(--font-mono); text-transform: uppercase;
+  letter-spacing: var(--track-label); color: var(--accent-ink);
+  border: var(--bw) solid var(--line); border-radius: var(--r-inner); padding: 0 .3rem;
+}
+.signing { font-size: var(--fs-14); color: var(--muted); margin: 0 0 var(--s-5); }
+.signing strong { color: var(--fg); }
+.needs-actor {
+  background: var(--card); border: var(--bw) solid var(--line);
+  border-left: var(--bw-rule) solid var(--accent-rule);
+  border-radius: var(--r-card); padding: var(--s-3) var(--s-4); font-size: var(--fs-14);
+  margin-bottom: var(--s-5); color: var(--sub);
+}
+
+/* -------------------------------------------------------------- form view */
+
+/* The rendered 8130-3.
+   The watermark is a pseudo-element over the whole sheet rather than a corner
+   badge, because a corner badge crops out of a screenshot and this is the one
+   artifact in the project that must never travel without saying what it is. */
+.sheet {
+  position: relative; background: var(--card); border: var(--bw) solid var(--fg);
+  border-radius: var(--r-chip); overflow: hidden;
+}
+.sheet::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 2;
+  background-image: repeating-linear-gradient(-30deg, transparent 0 38px, var(--fail-wash) 38px 76px);
+}
+.sheet .stamp {
+  position: absolute; inset: 0; display: flex; align-items: center;
+  justify-content: center; pointer-events: none; z-index: 3;
+}
+.sheet .stamp span {
+  transform: rotate(-18deg);
+  font: var(--w-black) clamp(var(--fs-16), 3.4vw, var(--fs-22))/1.35 var(--font-display);
+  letter-spacing: var(--track-stamp); text-transform: uppercase; text-align: center;
+  color: var(--fail-stamp);
+  border: var(--bw-stamp) solid var(--fail-stamp-line);
+  padding: var(--s-2) 1.1rem; border-radius: var(--r-inner);
+}
+.sheet .head {
+  border-bottom: var(--bw) solid var(--fg); padding: .55rem .7rem; text-align: center;
+}
+.sheet .head .t1 { font-size: var(--fs-12); letter-spacing: .04em; }
+.sheet .head .t2 { font-weight: var(--w-bold); font-size: var(--fs-15); letter-spacing: var(--track-display); }
+.grid { display: grid; grid-template-columns: repeat(4, 1fr); }
+.blk {
+  border-right: var(--bw) solid var(--line); border-bottom: var(--bw) solid var(--line);
+  padding: var(--s-2) .55rem; min-height: 3.5rem; position: relative;
+  cursor: pointer; background: transparent; text-align: left; width: 100%;
+  color: inherit; font: inherit; display: block; margin: 0; border-radius: 0;
+  text-transform: none; letter-spacing: normal;
+}
+.blk:last-child { border-right: 0; }
+.blk .n {
+  font: var(--w-regular) var(--fs-9)/var(--lh-snug) var(--font-mono); color: var(--muted);
+  text-transform: uppercase; letter-spacing: .07em; display: block; margin-bottom: .18rem;
+}
+.blk .v { font-size: var(--fs-13); word-break: break-word; }
+.blk .v.wide { font-size: var(--fs-12); }
+.blk.sel { background: var(--accent-wash-strong); }
+.blk:hover { background: var(--accent-wash); filter: none; }
+.blk.static, .blk.static:hover { cursor: default; background: transparent; }
+.blk.span2 { grid-column: span 2; }
+.blk.span4 { grid-column: span 4; }
+.blk.withheld .v { color: var(--muted); font-style: italic; }
+.blk .leafhash {
+  display: block; margin-top: .2rem; font-size: var(--fs-10); color: var(--muted);
+  font-family: var(--font-mono); word-break: break-all;
+}
+.cert { display: grid; grid-template-columns: 1fr 1fr; }
+.cert > div { border-right: var(--bw) solid var(--line); }
+.cert > div:last-child { border-right: 0; }
+.cert .capt {
+  font: var(--w-bold) var(--fs-10)/var(--lh-body) var(--font-mono); padding: .35rem .55rem;
+  border-bottom: var(--bw) solid var(--line); color: var(--muted);
+  text-transform: uppercase; letter-spacing: var(--track-label);
+}
+.cert .unused { opacity: .38; }
+.cert .stmt { padding: .45rem .55rem; font-size: var(--fs-12); }
+.cert .stmt.on { font-weight: var(--w-semibold); }
+
+/* The same sheet with its blocks open for typing.
+   Deliberately not styled as a stack of form controls. A visitor editing the
+   document is meant to feel like somebody amending a form, not like somebody
+   completing seventeen labelled inputs — which is the version nobody finished.
+   The stamp shrinks because at full size it sits across the fields you are
+   trying to read while you type in them. */
+.sheet.draft .stamp span { font-size: clamp(var(--fs-12), 2vw, var(--fs-18)); opacity: .6; }
+.blk.edit { cursor: default; }
+.blk.edit:hover { background: transparent; }
+.blk.edit input, .blk.edit select, .blk.edit textarea {
+  width: 100%; margin: 0; padding: .1rem .1rem .15rem; font: inherit;
+  font-size: var(--fs-13); color: inherit; background: transparent;
+  border: 0; border-bottom: var(--bw) dashed var(--line); border-radius: 0;
+  max-width: none; min-height: 0;
+}
+.blk.edit textarea { resize: vertical; min-height: 2.4rem; }
+.blk.edit input:focus, .blk.edit select:focus, .blk.edit textarea:focus {
+  outline: none; border-bottom-color: var(--accent-rule);
+  background: var(--accent-wash);
+}
+form.draftform button[type=submit] { margin-top: var(--s-4); }
+
+/* What the network kept, and what it did not.
+   Two tones and nothing else: the argument is which lines went dark, and a
+   legend or a badge per row would bury it under decoration. */
+.reveal {
+  display: grid; gap: var(--bw); background: var(--line);
+  border: var(--bw) solid var(--line); border-radius: var(--r-card); overflow: hidden;
+}
+.rev { display: flex; gap: var(--s-3); align-items: baseline; padding: .45rem .65rem; background: var(--card); }
+.rev .n {
+  flex: 0 0 40%; font: var(--w-bold) var(--fs-10)/var(--lh-body) var(--font-mono);
+  text-transform: uppercase; letter-spacing: var(--track-label); color: var(--muted);
+}
+.rev .v { font-size: var(--fs-14); word-break: break-word; }
+.rev.priv { background: var(--withheld-bg); }
+.rev.priv .v { color: var(--muted); font-style: italic; }
+@media (max-width: 34rem) {
+  .rev { display: block; }
+  .rev .n { display: block; margin-bottom: .15rem; }
+}
+
+/* The action on a goods-in card. The explanation sits beside the button
+   rather than under it, so a card stays one glance tall. */
+.checkrow { display: flex; align-items: center; gap: .7rem; flex-wrap: wrap; margin-top: var(--s-3); }
+.checkrow button { margin: 0; flex: 0 0 auto; }
+.checkrow .meta { margin: 0; flex: 1 1 14rem; min-width: 0; }
+
+/* What is being done while it is being done. Named, not timed: the server
+   answers when all seven are finished, and animating them in sequence would
+   be inventing progress the page cannot observe. */
+.checks-running {
+  list-style: none; margin: var(--s-4) 0 0; padding: 0; text-align: left;
+  display: grid; gap: .3rem;
+}
+.checks-running li {
+  font-size: var(--fs-13); color: var(--muted); padding-left: 1.1rem; position: relative;
+}
+.checks-running li::before {
+  content: "·"; position: absolute; left: .3rem; color: var(--accent-ink);
+  font-weight: var(--w-bold);
+}
+.working .detail { width: 100%; }
+
+.scanhead {
+  display: flex; align-items: baseline; gap: var(--s-3); flex-wrap: wrap;
+  margin: 1.1rem 0 var(--s-2); font-size: var(--fs-15); font-weight: var(--w-semibold);
+}
+.scanhead .meta { margin: 0; font-weight: var(--w-regular); }
+.startcheck { margin-top: 1.1rem; }
+.startcheck button { margin: 0; }
+.startcheck .meta { margin-top: var(--s-2); }
+
+.backlink { margin: 0 0 var(--s-3); font-size: var(--fs-14); }
+.backlink a { text-decoration: none; }
+
+/* The paper, read-only: the composer's sheet without the inputs. */
+.sheet.paper { margin-top: var(--s-4); }
+.sheet.paper .stamp span { font-size: clamp(var(--fs-12), 2vw, var(--fs-18)); opacity: .55; }
+.sheet.paper .blk { cursor: default; }
+.sheet.paper .blk:hover { background: transparent; }
+
+/* Sections, all built the same way.
+   They used to be a mixture — a heading with a card under it, a summary
+   nobody would notice, a coloured heading with nothing to fold — so the page
+   read as a pile of unrelated things rather than a sequence of steps with
+   states. The condition lives in the summary so it survives being closed: a
+   section somebody folded away can still tell them it passed. */
+.panel {
+  background: var(--card); border: var(--bw) solid var(--line); border-radius: var(--r-card);
+  margin-top: var(--s-3); overflow: hidden;
+}
+.panel > summary {
+  display: flex; align-items: center; gap: var(--s-3);
+  padding: var(--s-3) var(--s-4); cursor: pointer; list-style: none;
+  font-size: var(--fs-15); user-select: none;
+}
+.panel > summary::-webkit-details-marker { display: none; }
+.panel > summary:hover { background: var(--skip-bg); }
+.panel .pmark { flex: 0 0 auto; display: flex; color: var(--muted); }
+.panel .ptitle { font-weight: var(--w-semibold); }
+.ico-svg { width: 1.15rem; height: 1.15rem; display: block; }
+/* The disclosure mark, wherever a <details> opens. Scoped to the element
+   rather than to the panel, because the account switcher is the same gesture
+   and was drawing a Unicode triangle at .7rem to say so — which rendered at
+   whatever size and weight the reader's font stack felt like, sat beside
+   stroked SVGs everywhere else, and pointed the same way whether it was open
+   or shut. */
+.pchev {
+  flex: 0 0 auto; margin-left: auto; display: flex; color: var(--muted);
+  transition: transform var(--dur-fast) var(--ease);
+}
+.pchev .ico-svg { width: 1.05rem; height: 1.05rem; }
+details[open] > summary .pchev { transform: rotate(180deg); }
+.panel .pbody { padding: 0 var(--s-4) var(--s-4); }
+.panel .pbody > .sub:first-child { margin-top: 0; }
+
+/* The condition is the icon and nothing else. A rule down the side of every
+   panel turned the page into a column of stripes, which is loud for something
+   a tick already says. */
+.panel.ok .pmark { color: var(--pass); }
+.panel.no .pmark { color: var(--fail); }
+/* Publishing is not a verdict at all — the check already passed and said so
+   in green. Telling everyone is a separate act with no condition of its own,
+   so its mark is the same grey as every other section heading. */
+
+/* Stage rows sit flush inside a panel rather than in a card of their own. */
+.panel .stages {
+  border: var(--bw) solid var(--line); border-radius: var(--r-inner); overflow: hidden;
+}
+.panel .stages .stage { padding: .7rem .9rem; }
+
+.withheld-list {
+  margin: .2rem 0 var(--s-3); padding-left: 1.1rem; font-size: var(--fs-14);
+  color: var(--muted); columns: 2; column-gap: var(--s-6);
+}
+@media (max-width: 34rem) { .withheld-list { columns: 1; } }
+
+/* The document, folded once it has been read and the decision is below it. */
+.sheetfold > summary { font-weight: var(--w-semibold); color: var(--fg); }
+.sheetfold[open] > summary { margin-bottom: .3rem; }
+.outcome { margin-top: var(--s-5); }
+.outcome .ref {
+  word-break: break-all; font-family: var(--font-mono); font-size: var(--fs-12);
+  color: var(--muted); background: var(--skip-bg); border-radius: var(--r-inner);
+  padding: var(--s-2) .7rem;
+}
+.outcome .sect:first-child { margin-top: 0; }
+
+/* The checks, while they run. The names and their order are the pipeline's;
+   the pace is ours, because the client cannot see which one the server is on.
+   What replaces this is the real report. */
+.checking { margin-top: 1.2rem; }
+.steps {
+  list-style: none; margin: 0; padding: 0;
+  background: var(--card); border: var(--bw) solid var(--line); border-radius: var(--r-card);
+}
+.steps li {
+  display: flex; align-items: center; gap: .7rem;
+  padding: .7rem 1.125rem; border-bottom: var(--bw) solid var(--line);
+  font-size: var(--fs-15); color: var(--muted);
+  transition: color var(--dur-fast) var(--ease);
+}
+.steps li:last-child { border-bottom: 0; }
+.steps li.done { color: var(--fg); }
+.steps .tick {
+  flex: 0 0 auto; width: 1.05rem; height: 1.05rem; border-radius: var(--r-pill);
+  border: 2px solid var(--line); position: relative;
+}
+.steps li.done .tick { border-color: var(--pass); background: var(--pass); }
+.steps li.done .tick::after {
+  content: ""; position: absolute; left: .28rem; top: .1rem;
+  width: .22rem; height: .45rem; border: solid var(--card);
+  border-width: 0 2px 2px 0; transform: rotate(45deg);
+}
+/* The one still being waited on, so the list does not look stalled. */
+.steps li:not(.done):first-of-type .tick,
+.steps li.done + li:not(.done) .tick {
+  border-color: var(--accent-rule);
+  animation: pulsering 1.1s ease-in-out infinite;
+}
+@keyframes pulsering {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .35; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .steps li .tick { animation: none; }
+}
+
+/* The scanned document, folded away once a result is on screen. */
+.scan { margin-top: var(--s-4); }
+.scan > summary {
+  cursor: pointer; font-size: var(--fs-15); padding: var(--s-2) .2rem;
+  color: var(--accent-ink);
+}
+.scan .sub { margin: .3rem 0 .7rem; font-size: var(--fs-14); }
+
+/* What differed, when the record carries the block in the clear. */
+.mismatch {
+  margin-top: var(--s-4); padding: var(--card-pad); border-radius: var(--r-card);
+  background: var(--fail-bg); border: var(--bw) solid var(--line);
+  border-left: var(--bw-rule) solid var(--fail);
+}
+.mismatch h2 { margin-bottom: var(--s-2); }
+.mismatch p { margin: 0 0 .7rem; font-size: var(--fs-14); }
+.diff { margin: 0 0 var(--s-3); display: grid; gap: var(--s-2); }
+.diff > div {
+  background: var(--card); border: var(--bw) solid var(--line); border-radius: var(--r-inner);
+  padding: var(--s-2) .7rem;
+}
+.diff dt {
+  font: var(--w-bold) var(--fs-10)/var(--lh-body) var(--font-mono); text-transform: uppercase;
+  letter-spacing: var(--track-label); color: var(--muted); margin-bottom: .2rem;
+}
+.diff dd { margin: 0; display: flex; align-items: baseline; gap: var(--s-2); font-size: var(--fs-14); }
+.diff dd .was { text-decoration: line-through; color: var(--muted); }
+.diff dd .is { font-weight: var(--w-semibold); }
+.diff dd .sep {
+  font: var(--w-bold) var(--fs-10)/var(--lh-body) var(--font-mono); color: var(--muted);
+  text-transform: uppercase; letter-spacing: var(--track-label);
+}
+
+/* Publish or do not, side by side: neither is the safe default. */
+.choose { display: flex; gap: var(--s-3); flex-wrap: wrap; align-items: center; }
+.choose form { margin: 0; }
+.choose button { margin: 0; }
+
+/* The line that stops a green tick being read as more than it is. */
+.caveat {
+  margin-top: var(--s-2) !important; font-size: var(--fs-14); color: var(--muted);
+  border-top: var(--bw) solid var(--line); padding-top: var(--s-2);
+}
+
+/* Waiting on a generated form. It is a call to a model, so it takes a second
+   or two, and a blank dialog for that long reads as broken rather than busy. */
+.working {
+  display: flex; flex-direction: column; align-items: center; gap: var(--s-4);
+  padding: 3.5rem var(--s-4); color: var(--muted); text-align: center;
+}
+.working p { margin: 0; font-size: var(--fs-14); }
+.spinner {
+  width: 1.5rem; height: 1.5rem; border-radius: var(--r-pill);
+  border: 2px solid var(--line); border-top-color: var(--accent-rule);
+  animation: spin .8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .spinner { animation-duration: 3s; } }
+
+/* ------------------------------------------------------------------ panes */
+
+.panes { display: grid; gap: var(--s-4); grid-template-columns: 1fr; }
+@media (min-width: 60rem) { .panes { grid-template-columns: 1fr 1fr; } }
+.pane { border: var(--bw) solid var(--line); border-radius: var(--r-card); background: var(--card); overflow: hidden; }
+.pane > h3 {
+  margin: 0; padding: .55rem var(--s-3); font: var(--w-bold) var(--fs-11)/var(--lh-body) var(--font-mono);
+  text-transform: uppercase; letter-spacing: var(--track-label); color: var(--muted);
+  border-bottom: var(--bw) solid var(--line);
+}
+.pane .body { padding: .7rem var(--s-3); }
+.pane .body.foot { border-top: var(--bw) solid var(--line); font-size: var(--fs-13); color: var(--muted); }
+pre.rec {
+  margin: 0; padding: .7rem var(--s-3); font-family: var(--font-mono);
+  font-size: var(--fs-12); line-height: 1.5;
+  white-space: pre-wrap; word-break: break-all;
+}
+pre.rec .k { color: var(--accent-ink); }
+pre.rec mark { background: var(--accent-wash-strong); color: inherit; border-radius: var(--r-chip); }
+
+/* the leaf strip */
+.leaves { display: grid; grid-template-columns: repeat(8, 1fr); gap: 2px; }
+.leaf {
+  font-family: var(--font-mono); font-size: var(--fs-9); text-align: center;
+  padding: .28rem .1rem; border-radius: var(--r-chip); background: var(--skip-bg);
+  border: var(--bw) solid transparent; overflow: hidden;
+}
+.leaf.pad { opacity: .4; }
+.leaf.sel { border-color: var(--accent-rule); background: var(--accent-wash-strong); }
+.leaf .bn { display: block; font-size: var(--fs-9); color: var(--muted); }
+.fold { margin-top: .7rem; font-family: var(--font-mono); font-size: var(--fs-12); }
+.fold div { padding: .18rem 0; word-break: break-all; }
+.fold .op { color: var(--muted); }
+.fold .root { border-top: var(--bw) solid var(--line); margin-top: var(--s-1); padding-top: .3rem; }
+.fold .lead { color: var(--muted); font-size: var(--fs-12); margin-bottom: .3rem; }
+.tree-note { margin: var(--s-3) 0 .35rem; font-size: var(--fs-12); color: var(--muted); }
+.tree-hint { margin-top: .7rem; font-size: var(--fs-13); color: var(--muted); }
+.inert {
+  padding: var(--s-3); font-size: var(--fs-14); color: var(--muted);
+  background: var(--skip-bg); border-radius: var(--r-inner);
+}
+
+/* ------------------------------------------------------------------ shell */
+
+.app {
+  display: grid; grid-template-columns: var(--rail-w) minmax(0, var(--main-w));
+  gap: var(--s-6); max-width: var(--page-w); margin: 0 auto; padding: 0 var(--gutter);
+  align-items: start;
+}
+main { padding: var(--s-5) 0 5rem; min-width: 0; }
+
+.rail {
+  position: sticky; top: 0; padding: var(--s-4) 0;
+  display: flex; flex-direction: column; gap: var(--rail-gap);
+}
+.rail .brand { display: block; text-decoration: none; color: inherit; padding: 0 var(--s-3); }
+.brand {
+  font: var(--w-bold) var(--fs-34)/var(--lh-tight) var(--font-display);
+  text-transform: uppercase; letter-spacing: var(--track-display);
+}
+.rail .brand span {
+  display: block; margin-top: var(--s-2);
+  font: var(--w-regular) var(--fs-12)/1.4 var(--font-mono); color: var(--muted);
+  letter-spacing: var(--track-label); text-transform: uppercase;
+}
+.rail nav { display: flex; flex-direction: column; gap: var(--nav-gap); }
+/* The active item is marked by a rule down its left edge rather than a fill.
+   The transparent rule on every item keeps the text from shifting. */
+.rail nav a {
+  text-decoration: none; color: var(--sub); font-size: var(--fs-16); font-weight: var(--w-medium);
+  padding: var(--nav-pad); display: flex; align-items: center; gap: var(--s-3);
+  border-left: var(--bw-rule) solid transparent; border-radius: 0;
+}
+.rail nav a:hover { background: var(--skip-bg); }
+.rail nav a.on { color: var(--fg); font-weight: var(--w-semibold); border-left-color: var(--accent-rule); }
+.rail nav a .ico { width: 1.05rem; text-align: center; opacity: .75; }
+.rail nav a .badge {
+  margin-left: auto; font: var(--w-bold) var(--fs-11)/1.7 var(--font-mono);
+  background: var(--cta-bg); color: var(--cta-fg); border-radius: var(--r-inner);
+  padding: 0 .4rem; min-width: 1.25rem; text-align: center;
+}
+.rail .newpost {
+  margin: 0 var(--s-3); padding: .8125rem; text-align: center;
+  background: var(--cta-bg); color: var(--cta-fg); border-radius: var(--r-card);
+  text-decoration: none; font: var(--w-bold) var(--fs-16)/var(--lh-tight) var(--font-display);
+  text-transform: uppercase; letter-spacing: var(--track-cta);
+}
+.rail .newpost:hover { filter: brightness(1.06); }
+.rail .newpost.off { background: var(--line); color: var(--muted); filter: none; }
+
+/* Identity under the rail rather than pinned to the foot of it. Pinning
+   wants a full-height rail, and a full-height rail under a banner of unknown
+   height overflows the viewport by exactly the banner. */
+.me { border-top: var(--bw) solid var(--line); padding-top: var(--s-5); }
+.me > summary {
+  list-style: none; cursor: pointer; padding: var(--s-2) var(--s-3); border-radius: var(--r-inner);
+  display: flex; align-items: center; gap: var(--s-3);
+}
+.me > summary::-webkit-details-marker { display: none; }
+.me > summary:hover { background: var(--skip-bg); }
+.me .av { width: var(--av-lg); height: var(--av-lg); font-size: var(--fs-13); }
+.me .who { min-width: 0; }
+.me .who b { display: block; font-size: var(--fs-15); font-weight: var(--w-semibold);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.me .who em {
+  font: var(--w-regular) var(--fs-11)/var(--lh-body) var(--font-mono); color: var(--muted);
+  text-transform: uppercase; letter-spacing: var(--track-label);
+}
+
+.switcher {
+  max-height: 22rem; overflow-y: auto; margin: .3rem 0 0;
+  border: var(--bw) solid var(--line); border-radius: var(--r-card); background: var(--card);
+  padding: .3rem;
+}
+.switcher h4 {
+  margin: var(--s-2) var(--s-2) .2rem; font: var(--w-bold) var(--fs-11)/var(--lh-body) var(--font-mono);
+  text-transform: uppercase; letter-spacing: var(--track-label); color: var(--muted);
+}
+.switcher button {
+  margin: 0; width: 100%; text-align: left; background: none; color: var(--fg);
+  border-radius: var(--r-inner); padding: var(--s-2); font: inherit; font-size: var(--fs-14);
+  text-transform: none; letter-spacing: normal;
+  display: flex; align-items: center; gap: var(--s-2);
+}
+.switcher button:hover { background: var(--skip-bg); filter: none; }
+.switcher button.on { font-weight: var(--w-semibold); }
+
+/* A monogram, hash-coloured from the organisation's name. The template sets
+   only --av-h; how saturated and how light are the theme's decision. */
+.av {
+  flex: 0 0 auto; width: var(--av-md); height: var(--av-md); border-radius: var(--r-inner);
+  display: inline-flex; align-items: center; justify-content: center;
+  background: hsl(var(--av-h, 0) var(--av-sat) var(--av-light));
+  color: var(--on-color); font: var(--w-bold) var(--fs-11)/1 var(--font-mono);
+  letter-spacing: var(--track-display);
+}
+.av.sm { width: var(--av-sm); height: var(--av-sm); font-size: var(--fs-9); }
+.av.public { background: var(--muted); }
+
+/* ----------------------------------------------------------------- thread */
+
+.post {
+  background: var(--card); border: var(--bw) solid var(--line); border-radius: var(--r-card);
+  padding: var(--card-pad);
+}
+.post .who { display: flex; align-items: center; gap: var(--s-3); }
+.post .ident strong { display: block; font-size: var(--fs-16); }
+.post .ident .hnd { font-family: var(--font-mono); font-size: var(--fs-12); color: var(--muted); }
+.post .pt { font-size: var(--fs-20); font-weight: var(--w-semibold); letter-spacing: var(--track-nomen); margin: var(--s-3) 0 .35rem; }
+.post .pmeta { font-size: var(--fs-14); margin-bottom: .7rem; }
+.post .ptimes { display: flex; gap: 1.75rem; flex-wrap: wrap; padding: .7rem 0;
+  border-top: var(--bw) solid var(--line); border-bottom: var(--bw) solid var(--line); }
+.post .ptimes div { font-family: var(--font-mono); font-size: var(--fs-13); }
+.post .ptimes .label { display: block; color: var(--muted); font-weight: var(--w-bold);
+  text-transform: uppercase; letter-spacing: var(--track-label); font-size: var(--fs-10); }
+.post .pactions { display: flex; gap: var(--s-2); flex-wrap: wrap; padding: var(--s-3) 0 .2rem; }
+.act {
+  font: var(--w-bold) var(--fs-12)/var(--lh-body) var(--font-mono); text-transform: uppercase;
+  letter-spacing: var(--track-label); text-decoration: none; color: var(--accent-ink);
+  border: var(--bw) solid var(--line); border-radius: var(--r-pill); padding: .3rem var(--s-3);
+}
+.act:hover { background: var(--skip-bg); }
+.post .meta { margin-top: var(--s-3); font-size: var(--fs-12); color: var(--muted); }
+
+/* ------------------------------------------------------------ account page
+
+   The header a social client puts above somebody's posts, with the two things
+   a social client has and this does not left out. There is no cover image and
+   no bio, because an organization publishes neither and inventing them would
+   be the application asserting something the network never said.
+
+   What is here instead is the station record: a name, a role, a commercial
+   identifier and a certificate number, each of them self-asserted and none of
+   them committed to by any release. The page says so once, at the bottom,
+   rather than hedging every field. */
+.account {
+  background: var(--card); border: var(--bw) solid var(--line); border-radius: var(--r-card);
+  padding: var(--card-pad);
+}
+.account .who { display: flex; align-items: center; gap: var(--s-3); }
+.account .av { width: var(--av-xl); height: var(--av-xl); font-size: var(--fs-16); }
+.account .ident { min-width: 0; }
+.account .ident h1 { font-size: var(--fs-34); margin: 0; overflow-wrap: anywhere; }
+.account .ident .role { color: var(--sub); font-size: var(--fs-15); }
+/* The handle is a domain the organization proved control of through DNS, which
+   is the load-bearing half of the identity — so it gets its own line at full
+   size rather than being tucked in beside the name. */
+.account .hnd {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--s-1) var(--s-4);
+  margin-top: var(--s-3); font-family: var(--font-mono); font-size: var(--fs-14);
+}
+.account .hnd .at { word-break: break-all; }
+.account .hnd .unresolved { color: var(--muted); font-family: var(--font-body); }
+.account .hnd .since { color: var(--muted); font-size: var(--fs-12); cursor: help; }
+.account .facts {
+  display: flex; flex-wrap: wrap; gap: .3rem var(--s-6); margin: var(--s-3) 0 0;
+  padding-top: var(--s-3); border-top: var(--bw) solid var(--line);
+}
+.account .facts > div { display: flex; align-items: baseline; gap: var(--s-2); min-width: 0; }
+.account .facts dt {
+  font: var(--w-bold) var(--fs-10)/var(--lh-body) var(--font-mono); letter-spacing: var(--track-label-wide);
+  color: var(--muted); text-transform: uppercase; white-space: nowrap;
+}
+.account .facts dd { margin: 0; font-family: var(--font-mono); font-size: var(--fs-13); word-break: break-all; }
+/* Counts, not a score. Three numbers with the sentence that says what each one
+   is, because "5 of 12" over a shop means nothing without "checked by someone
+   other than the shop". */
+.account .counts {
+  display: flex; flex-wrap: wrap; gap: .35rem 1.6rem; margin-top: var(--s-3);
+  padding-top: var(--s-3); border-top: var(--bw) solid var(--line);
+}
+/* Number over word, the way a social client stacks a follower count. The
+   figure is what the eye lands on and the label only tells it what it landed
+   on, which is the arrangement that survives three counts side by side. */
+.account .counts > div { display: flex; flex-direction: column; gap: .15rem; cursor: help; }
+.account .counts b {
+  color: var(--fg); font: var(--w-bold) var(--fs-26)/var(--lh-tight) var(--font-display);
+  letter-spacing: var(--track-display);
+}
+.account .counts span {
+  font: var(--w-regular) var(--fs-11)/var(--lh-body) var(--font-mono); color: var(--muted);
+  text-transform: uppercase; letter-spacing: var(--track-label);
+}
+.account .selfsaid { margin: var(--s-3) 0 0; font-size: var(--fs-12); color: var(--muted); }
+.account .noprofile {
+  margin: var(--s-3) 0 0; padding-top: var(--s-3); border-top: var(--bw) solid var(--line);
+  font-size: var(--fs-13); color: var(--muted);
+}
+
+/* Two tabs, and they are two collections in one repository rather than two
+   filters over one list: a release is a record this account signed about a
+   part, a check is a record it signed about somebody else's release. */
+.tabs { display: flex; gap: var(--s-1); margin: var(--s-4) 0 var(--s-3); border-bottom: var(--bw) solid var(--line); }
+.tabs a {
+  padding: .55rem .85rem; font-size: var(--fs-15); text-decoration: none;
+  color: var(--muted); border-bottom: var(--bw-tab) solid transparent; margin-bottom: calc(-1 * var(--bw));
+}
+.tabs a:hover { color: var(--fg); }
+.tabs a.on { color: var(--fg); font-weight: var(--w-semibold); border-bottom-color: var(--accent-rule); }
+.tabs a .n { font-family: var(--font-mono); font-weight: var(--w-regular); color: var(--muted); margin-left: .35rem; font-size: var(--fs-12); }
+
+/* The network tab. */
+.relnote { margin: 0 0 .7rem; font-size: var(--fs-12); color: var(--muted); }
+.relrow {
+  display: flex; align-items: center; gap: var(--s-3);
+  padding: .65rem .9rem; border-bottom: var(--bw) solid var(--line);
+  text-decoration: none; color: inherit;
+}
+.relrow:last-child { border-bottom: 0; }
+.relrow:hover { background: var(--skip-bg); }
+.rident { min-width: 0; flex: 1; }
+.rident strong { display: block; font-size: var(--fs-15); }
+.rident em { font-style: normal; font-size: var(--fs-12); color: var(--muted); }
+
+/* A name that leads to its account page. Underlined only on hover, because
+   every card carries one and a feed of coloured links reads as a link farm. */
+a.byline { color: inherit; text-decoration: none; }
+a.byline:hover { text-decoration: underline; text-decoration-color: var(--accent-rule); }
+
+.replies { margin-top: var(--s-3); display: flex; flex-direction: column; gap: var(--s-2); }
+/* Indented, and joined to the post above by a rail, because the nesting is
+   the argument: everything below the first card lives in somebody else's
+   repository and cannot be removed from up here. */
+.replies .reply { margin-left: var(--s-5); position: relative; }
+.replies .reply::before {
+  content: ''; position: absolute; left: -.8rem; top: -.55rem; bottom: 50%;
+  width: var(--bw); background: var(--line);
+}
+.event.answer {
+  margin: var(--s-3) 0 0 var(--s-5); background: var(--skip-bg); position: relative;
+}
+.event.answer::before {
+  content: ''; position: absolute; left: -.8rem; top: -.6rem; bottom: 50%;
+  width: var(--bw); background: var(--line);
+}
+/* A quoted release, inside the verdict that judges it. The border is what
+   says "this is somebody else's record" — the same thing a quote-post does. */
+.quoted {
+  display: block; margin-top: var(--s-3); padding: var(--nest-pad);
+  border: var(--bw) solid var(--line); border-radius: var(--r-inner);
+  text-decoration: none; color: inherit; background: var(--nest);
+}
+.quoted:hover { border-color: var(--accent-rule); }
+.quoted .qwho {
+  display: flex; align-items: center; gap: var(--s-2); font-size: var(--fs-14);
+}
+.quoted .qwho .when {
+  margin-left: auto; color: var(--muted); font-family: var(--font-mono);
+  font-size: var(--fs-12); white-space: nowrap;
+}
+.quoted .unseen { font-style: italic; font-size: var(--fs-12); color: var(--muted); margin-top: .3rem; }
+
+/* The dataplate.
+   A component carries a stamped plate with its nomenclature and two labelled
+   numbers, and every document about it repeats that shape. Rendering it as a
+   run-on line of punctuation-separated strings threw away a convention the
+   reader already knows. The labels are two characters and buy recognition. */
+.plate { margin-top: var(--s-2); }
+.plate .nomen { font-size: var(--fs-20); font-weight: var(--w-semibold); letter-spacing: var(--track-nomen); line-height: var(--lh-snug); }
+.plate .nomen a { color: inherit; text-decoration: none; }
+.plate .nomen a:hover { text-decoration: underline; text-decoration-color: var(--accent-rule); }
+.ids {
+  display: flex; flex-wrap: wrap; align-items: center; gap: .3rem var(--s-4); margin: var(--s-2) 0 0;
+}
+.ids > div { display: flex; align-items: baseline; gap: .35rem; }
+.ids dt {
+  font: var(--w-bold) var(--fs-11)/var(--lh-body) var(--font-mono); letter-spacing: var(--track-label-wide);
+  color: var(--accent-ink); text-transform: uppercase;
+}
+.ids dd { margin: 0; font-family: var(--font-mono); font-size: var(--fs-14); }
+.ids dd a { color: inherit; text-decoration: none; border-bottom: var(--bw) dotted var(--line); }
+.ids dd a:hover { color: var(--accent-ink); border-bottom-color: var(--accent-ink); }
+/* Whatever ends the identifier row — a CHECKED pill, a review button — sits
+   at its right edge. */
+.ids .trail { margin-left: auto; display: flex; align-items: center; }
+/* Inside a quote the plate is the whole content, so it sheds its top margin. */
+.plate.sm { margin-top: .3rem; }
+.plate.sm .nomen { font-size: var(--fs-17); font-weight: var(--w-semibold); }
+.plate.sm .ids dd { font-size: var(--fs-13); }
+/* On a part page the two numbers are the subject of the page, not a caption. */
+.ids.big { gap: .3rem 1.4rem; margin-top: var(--s-2); }
+.ids.big dd { font-size: var(--fs-16); }
+.event .who .ico, .event .av { align-self: center; }
+/* The DID beside a name. Present because it is the thing that is actually
+   cryptographically meaningful, quiet because it is not what anyone reads. */
+.did {
+  font-family: var(--font-mono); font-size: var(--fs-11); color: var(--muted);
+  margin-left: .3rem; cursor: help; white-space: nowrap;
+}
+a.tag { text-decoration: none; border-bottom: var(--bw) dotted var(--line); }
+a.tag:hover { border-bottom-color: var(--accent-ink); }
+.event .when a { color: inherit; text-decoration: none; }
+.event .when a:hover { text-decoration: underline; }
+
+/* ------------------------------------------------------------------ inbox */
+
+.seam {
+  background: var(--card); border: var(--bw) solid var(--line);
+  border-left: var(--bw-rule) solid var(--accent-rule);
+  border-radius: var(--r-card); padding: var(--s-3) var(--s-4); font-size: var(--fs-14);
+  color: var(--sub); margin-bottom: 1.1rem;
+}
+.seam strong { color: var(--fg); }
+.seam .v2 {
+  display: block; margin-top: .45rem; padding-top: .45rem;
+  border-top: var(--bw) dashed var(--line); font-style: italic;
+}
+
+/* ------------------------------------------------------ a part, as a topic */
+
+.topic { padding: var(--s-2) 0 var(--s-5); }
+.topic .tname { font-size: var(--fs-26); font-weight: var(--w-semibold); letter-spacing: var(--track-nomen); line-height: var(--lh-snug); }
+.topic .tnote {
+  font-size: var(--fs-13); color: var(--muted); margin: .7rem 0 0; max-width: 34rem;
+}
+
+/* the two histories, side by side */
+.compare {
+  display: grid; grid-template-columns: 1fr 1fr; gap: .9rem;
+  background: var(--card); border: var(--bw) solid var(--line); border-radius: var(--r-card);
+  padding: var(--card-pad); font-size: var(--fs-14);
+}
+.compare.differ { border-color: var(--fail); background: var(--fail-bg); }
+.compare .label {
+  display: block; font: var(--w-bold) var(--fs-10)/var(--lh-body) var(--font-mono);
+  text-transform: uppercase; letter-spacing: var(--track-label); color: var(--muted); margin-bottom: .15rem;
+}
+.compare .cnote {
+  grid-column: 1 / -1; margin: .2rem 0 0; font-size: var(--fs-13); color: var(--muted);
+  border-top: var(--bw) solid var(--line); padding-top: var(--s-3);
+}
+.compare.differ .cnote strong { color: var(--fail); }
+@media (max-width: 40rem) { .compare { grid-template-columns: 1fr; } }
+
+/* --------------------------------------------------------------- composer */
+
+dialog#composer {
+  width: min(var(--dialog-w), calc(100vw - 2rem)); max-height: 86vh; padding: 0;
+  border: var(--bw) solid var(--line); border-radius: var(--r-dialog);
+  background: var(--card); color: var(--fg); overflow: hidden;
+  box-shadow: var(--shadow-dialog);
+}
+dialog#composer::backdrop { background: var(--backdrop); }
+dialog#composer .chead {
+  display: flex; align-items: center; gap: var(--s-3);
+  padding: .875rem 1.125rem; border-bottom: var(--bw) solid var(--line);
+}
+dialog#composer .chead strong {
+  font: var(--w-bold) var(--fs-20)/var(--lh-tight) var(--font-display);
+  text-transform: uppercase; letter-spacing: var(--track-display);
+}
+dialog#composer .chead .chip { margin-left: auto; }
+dialog#composer .chead form { margin: 0; }
+/* The close: a bare mark, not a boxed action. */
+dialog#composer .chead .close {
+  border: 0; padding: 0 var(--s-1); font: var(--w-regular) var(--fs-20)/1 var(--font-body);
+  color: var(--muted); background: none;
+}
+dialog#composer .chead .close:hover { color: var(--fg); background: none; }
+dialog#composer .cbody { padding: var(--s-4) 1.125rem; overflow-y: auto; max-height: calc(86vh - 3.75rem); }
+/* The page served into the dialog carries its own title, which the header
+   already gave; inside the box it reads as a subheading. */
+dialog#composer .cbody h1 { font-size: var(--fs-26); }
+/* A small mono tag: DRAFT on the composer, and anywhere else a state needs
+   naming without colouring. */
+.chip {
+  font: var(--w-bold) var(--fs-11)/var(--lh-body) var(--font-mono); text-transform: uppercase;
+  letter-spacing: var(--track-label); color: var(--muted);
+  border: var(--bw) solid var(--line); border-radius: var(--r-inner); padding: .15rem var(--s-2);
+}
+
+/* the compose row at the top of the feed */
+.compose-row {
+  display: flex; align-items: center; gap: var(--s-3); width: 100%;
+  background: var(--card); border: var(--bw) solid var(--line); border-radius: var(--r-card);
+  padding: var(--s-3) .875rem; margin-bottom: var(--feed-gap); cursor: pointer;
+  color: var(--muted); font-size: var(--fs-16); text-decoration: none;
+}
+.compose-row:hover { border-color: var(--accent-rule); }
+
+/* Desktop shows the long label; the tab bar's short one stays out of the way. */
+.rail nav a .tab, .rail .newpost .tab { display: none; }
+
+/*
+ * Phones get a different shape, not a squeezed version of this one.
+ *
+ * Five links in a row measured 527px against a 390px viewport, so the page
+ * scrolled sideways and every link wrapped its own text onto two lines — which
+ * is also why the banner stopped short of the right edge. A rail is a desktop
+ * idea. On a phone the navigation goes where a thumb is, which is the bottom.
+ */
+@media (max-width: 60rem) {
+  .app { grid-template-columns: minmax(0, 1fr); gap: 0; }
+  h1 { font-size: var(--fs-32); }
+  .marker { font-size: var(--fs-12); padding: .4rem var(--s-3); }
+
+  /* The rail becomes a top bar holding only identity. */
+  .rail {
+    position: static; height: auto; flex-direction: row; align-items: center;
+    gap: var(--s-2); padding: .55rem 0; border-bottom: var(--bw) solid var(--line);
+  }
+  .rail .brand { padding: 0; }
+  .brand { font-size: var(--fs-26); }
+  .rail .brand br, .rail .brand span { display: none; }
+
+  /* And the links become a tab bar pinned to the bottom of the viewport. The
+     active item's rule moves from its left edge to its top edge. */
+  .rail nav {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 20;
+    flex-direction: row; justify-content: space-around; gap: 0;
+    background: var(--card); border-top: var(--bw) solid var(--line);
+    padding: 0 .2rem calc(.3rem + env(safe-area-inset-bottom, 0px));
+  }
+  .rail nav a {
+    flex: 1 1 0; min-width: 0; flex-direction: column; align-items: center;
+    gap: .1rem; padding: .35rem .15rem .25rem; border-left: 0;
+    border-top: var(--bw-tab) solid transparent;
+    font-size: var(--fs-11); line-height: 1.2; text-align: center;
+  }
+  .rail nav a:hover { background: none; }
+  .rail nav a.on { color: var(--fg); border-top-color: var(--accent-rule); }
+  .rail nav a .ico { font-size: var(--fs-18); opacity: 1; width: auto; }
+  .rail nav a .full { display: none; }
+  .rail nav a .tab { display: block; }
+
+  /* The count rides on the icon rather than pushing the label sideways. */
+  .rail nav a { position: relative; }
+  .rail nav a .badge {
+    position: absolute; top: .15rem; left: 50%; margin-left: .25rem;
+    padding: 0 .3rem; font-size: var(--fs-10); min-width: 1rem;
+  }
+
+  /* Compose floats clear of the tab bar, the way a social client does it. */
+  .rail .newpost {
+    position: fixed; right: var(--s-4); z-index: 21; margin: 0; padding: 0;
+    bottom: calc(4.1rem + env(safe-area-inset-bottom, 0px));
+    width: 3.4rem; height: 3.4rem; border-radius: var(--r-pill);
+    display: grid; place-items: center; font-size: var(--fs-26); font-weight: var(--w-medium);
+    box-shadow: var(--shadow-float);
+  }
+  .rail .newpost .full { display: none; }
+  .rail .newpost .tab { display: block; line-height: 1; }
+  .rail .newpost.off { box-shadow: none; }
+
+  /* Identity sits at the top right, and its menu drops from there. */
+  .me { margin: 0 0 0 auto; position: relative; border-top: 0; padding-top: 0; }
+  .me > summary { padding: var(--s-1) .3rem; }
+  .me .av { width: var(--av-md); height: var(--av-md); font-size: var(--fs-11); }
+  .me .who b { max-width: 8.5rem; }
+  .switcher {
+    position: absolute; right: 0; z-index: 22; width: 15rem;
+    max-height: 60vh; box-shadow: var(--shadow-menu);
+  }
+
+  /* The profile header at phone width: the name is long and the avatar is
+     not, so the type steps down rather than wrapping three deep. */
+  .account .ident h1 { font-size: var(--fs-26); }
+  .account .counts { gap: .35rem var(--s-5); }
+
+  /* Cards keep the desktop padding on the long axis and give a little back
+     on the short one. */
+  .event, .post, .account, .compare { padding: var(--s-4) var(--s-3); }
+
+  /* The composer takes the whole width of a phone. */
+  dialog#composer { width: calc(100vw - 1rem); max-height: 92vh; }
+  dialog#composer .cbody { max-height: calc(92vh - 3.75rem); padding: var(--s-3); }
+
+  /* Tables give back some of their padding so three columns fit a phone;
+     past that the card still scrolls sideways. */
+  th, td { padding-left: var(--s-3); padding-right: var(--s-3); }
+  th { white-space: normal; }
+  td .who { min-width: 9rem; }
+
+  /* Clear the tab bar and the floating button. */
+  main { padding-bottom: 7rem; }
+}
+
+/* The 8130-3 has four columns of blocks because the paper does. On a phone
+   four columns is nine characters wide each, so the sheet folds to two and
+   a block that spanned the row still spans the row. */
+@media (max-width: 34rem) {
+  .grid { grid-template-columns: repeat(2, 1fr); }
+  .blk.span4 { grid-column: span 2; }
+  .leaves { grid-template-columns: repeat(4, 1fr); }
+  .ids .trail { margin-left: 0; flex-basis: 100%; }
+}

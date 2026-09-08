@@ -228,6 +228,22 @@ keys and real inclusion proofs. Paste the `tampered` bundle into the verify
 page to see the moment the design is built around: a genuine signature beside
 a commitment that no longer matches.
 
+### How it is painted
+
+The interface has one design system and every screen is drawn from it:
+
+| | |
+|---|---|
+| `web/src/styles/tokens.css` | the vocabulary — palette for light and dark, type scale, radii, spacing, shadows, motion |
+| `web/src/styles/app.css` | the components, written only in terms of those tokens |
+
+Neither the templates nor `app.css` carry a colour, typeface, size or radius of
+their own; to change how something looks, change the token. The two files are
+read once at startup and inlined into every page, so a page is still a single
+request and there is no build step. The fonts — Barlow Condensed for display,
+Barlow for text, Space Mono for every identifier — are the one thing fetched
+from elsewhere, and each has a system fallback.
+
 ```bash
 npm install && npm test        # TypeScript: commitment core + verification pipeline
 go test ./commitment/          # Go core, against the same vectors

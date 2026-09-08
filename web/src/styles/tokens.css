@@ -1,0 +1,200 @@
+/*
+ * OffWing design tokens — the "Airside" theme.
+ *
+ * This file is the whole vocabulary the interface is allowed to use. Every
+ * colour, typeface, size, radius, shadow and duration the app paints with is
+ * declared here once and referenced everywhere else by name; app.css and the
+ * templates never carry a raw value of their own. Change a token and the
+ * change lands on every screen at once, which is the point of having them.
+ *
+ * Direction: softened black and warm off-white fields, one safety-yellow
+ * accent, condensed uppercase display type for headings and primary actions,
+ * monospace for every identifier. The product should read as aviation and
+ * MRO infrastructure rather than as a generic social client.
+ *
+ * Both themes are specified. Light is the default; dark follows the reader's
+ * prefers-color-scheme. Only the palette changes between them — type, shape
+ * and spacing are the same in both.
+ *
+ * Breakpoints cannot be custom properties, so for the record they are:
+ *   60rem  the rail becomes a top bar and the navigation a bottom tab bar
+ *   40rem  side-by-side comparisons stack
+ *   34rem  two-column lists and label/value rows stack
+ */
+
+:root {
+  color-scheme: light;
+
+  /* ---------------------------------------------------------- palette, light
+     The rule for yellow on light: #f2c318 is a *surface* colour only (the
+     primary button, the badge, the YOU chip). Yellow as text uses
+     --accent-ink and yellow as a line uses --accent-rule, both darkened so
+     they hold contrast against the off-white field. On dark all three are
+     the same yellow. */
+  --bg: #ebeae5;            /* page field */
+  --card: #f7f6f2;          /* cards, panels, the rail's menus */
+  --nest: #ebeae5;          /* a record quoted inside another card */
+  --line: #d5d3cc;          /* every 1px border and rule */
+  --fg: #1d1f23;            /* primary text */
+  --sub: #55575c;           /* secondary text: byline verbs, descriptions */
+  --muted: #7c7e82;         /* tertiary text: timestamps, labels, captions */
+
+  --accent: #f2c318;        /* yellow as a surface */
+  --accent-ink: #a07a00;    /* yellow as text */
+  --accent-rule: #e6b400;   /* yellow as a line: active nav, seam, tab underline */
+  --accent-fg: #1d1f23;     /* ink on an accent surface */
+  --cta-bg: #1d1f23;        /* primary button — inverts on light */
+  --cta-fg: #f2c318;
+
+  --pass: #1e7a4a;
+  --fail: #b3261e;
+  --warn: #8a6100;
+  --skip: #7c7e82;
+  --pass-bg: #e0efe4;
+  --fail-bg: #f8e3e0;
+  --warn-bg: #f7efd2;
+  --skip-bg: #e2e0da;       /* also the neutral hover wash */
+
+  --backdrop: rgba(20, 20, 22, .5);
+  --on-color: #ffffff;      /* text on a saturated avatar or status colour */
+
+  /* Derived washes: a hint of a colour over whatever is underneath, for a
+     selected form block, a highlighted key in a record, the watermark. */
+  --accent-wash: color-mix(in srgb, var(--accent-rule) 9%, transparent);
+  --accent-wash-strong: color-mix(in srgb, var(--accent-rule) 20%, transparent);
+  --fail-wash: color-mix(in srgb, var(--fail) 7%, transparent);
+  --fail-stamp: color-mix(in srgb, var(--fail) 32%, transparent);
+  --fail-stamp-line: color-mix(in srgb, var(--fail) 24%, transparent);
+  --withheld-bg: color-mix(in srgb, var(--muted) 12%, var(--card));
+
+  /* Avatars are hash-coloured from the organisation's name; the markup
+     supplies only the hue, and these two decide how loud it is. */
+  --av-sat: 38%;
+  --av-light: 42%;
+
+  /* ------------------------------------------------------------------ type */
+  --font-display: 'Barlow Condensed', 'Arial Narrow', 'Helvetica Neue', sans-serif;
+  --font-body: 'Barlow', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'Space Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* The scale, in rem so a reader's own font-size preference still applies.
+     Named for the pixel size at the 16px default, which is how the design
+     specifies them. */
+  --fs-9: .5625rem;
+  --fs-10: .625rem;
+  --fs-11: .6875rem;
+  --fs-12: .75rem;
+  --fs-13: .8125rem;
+  --fs-14: .875rem;
+  --fs-15: .9375rem;
+  --fs-16: 1rem;
+  --fs-17: 1.0625rem;
+  --fs-18: 1.125rem;
+  --fs-20: 1.25rem;
+  --fs-22: 1.375rem;
+  --fs-26: 1.625rem;
+  --fs-32: 2rem;
+  --fs-34: 2.125rem;
+  --fs-40: 2.5rem;
+
+  --lh-tight: 1;
+  --lh-snug: 1.3;
+  --lh-body: 1.55;
+
+  --w-regular: 400;
+  --w-medium: 500;
+  --w-semibold: 600;
+  --w-bold: 700;
+  --w-black: 800;
+
+  --track-display: .02em;   /* display type */
+  --track-cta: .06em;       /* the primary button */
+  --track-label: .06em;     /* uppercase mono labels */
+  --track-label-wide: .08em;/* section labels, tiny facts */
+  --track-stamp: .18em;     /* the synthetic watermark */
+  --track-nomen: -.01em;    /* part names */
+
+  /* ----------------------------------------------------------------- shape */
+  --r-card: 4px;            /* cards, buttons, compose row, panels, tables */
+  --r-inner: 3px;           /* nested quote, badges, chips, avatars */
+  --r-chip: 2px;            /* the YOU chip and the 8130-3 sheet */
+  --r-dialog: 6px;
+  --r-pill: 999px;          /* the mobile compose button and thread actions */
+
+  --bw: 1px;                /* the ordinary border */
+  --bw-rule: 3px;           /* the accent rule beside an active item or a seam */
+  --bw-tab: 2px;            /* the underline beneath an active tab */
+  --bw-stamp: 3px;
+
+  /* --------------------------------------------------------------- spacing */
+  --s-1: .25rem;
+  --s-2: .5rem;
+  --s-3: .75rem;
+  --s-4: 1rem;
+  --s-5: 1.25rem;
+  --s-6: 1.5rem;
+  --s-7: 2rem;
+
+  --card-pad: 1rem 1.125rem;           /* 16 × 18 */
+  --nest-pad: .75rem .875rem;          /* 12 × 14 */
+  --feed-gap: .875rem;                 /* 14 */
+  --nav-pad: .5625rem .75rem;          /* 9 × 12 */
+  --nav-gap: 2px;
+  --rail-gap: 1.625rem;                /* 26 */
+
+  --av-sm: 1.5rem;                     /* 24: inside a quote */
+  --av-md: 1.875rem;                   /* 30: card byline */
+  --av-lg: 2.5rem;                     /* 40: rail identity */
+  --av-xl: 3.5rem;                     /* 56: profile header */
+
+  /* ---------------------------------------------------------------- layout */
+  --rail-w: 15rem;
+  --main-w: 40rem;
+  --page-w: 58rem;
+  --dialog-w: 45rem;                   /* 720 */
+  --gutter: 1.25rem;
+
+  /* --------------------------------------------------------- shadow, motion */
+  --shadow-dialog: 0 30px 80px rgba(0, 0, 0, .4);
+  --shadow-float: 0 2px 12px rgba(0, 0, 0, .28);
+  --shadow-menu: 0 4px 16px rgba(0, 0, 0, .18);
+
+  --dur-fast: .18s;
+  --dur: .35s;
+  --ease: ease-out;
+
+  --focus-w: 2px;
+  --focus-offset: 2px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+
+    --bg: #202226;
+    --card: #292b30;
+    --nest: #22242a;
+    --line: #383b41;
+    --fg: #eeede8;
+    --sub: #b4b5b0;
+    --muted: #8d8f8b;
+
+    --accent: #f2c318;
+    --accent-ink: #f2c318;
+    --accent-rule: #f2c318;
+    --accent-fg: #202226;
+    --cta-bg: #f2c318;
+    --cta-fg: #202226;
+
+    --pass: #6fd39a;
+    --fail: #f0786a;
+    --warn: #e6b84a;
+    --skip: #8d8f8b;
+    --pass-bg: #1c3326;
+    --fail-bg: #3a201c;
+    --warn-bg: #33290f;
+    --skip-bg: #2f3136;
+
+    --backdrop: rgba(0, 0, 0, .55);
+  }
+}
