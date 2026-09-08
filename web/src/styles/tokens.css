@@ -1,5 +1,5 @@
 /*
- * OffWing design tokens — the "Airside" theme.
+ * Offwing design tokens — the "Airside" theme.
  *
  * This file is the whole vocabulary the interface is allowed to use. Every
  * colour, typeface, size, radius, shadow and duration the app paints with is
@@ -12,50 +12,61 @@
  * monospace for every identifier. The product should read as aviation and
  * MRO infrastructure rather than as a generic social client.
  *
- * Both themes are specified. Light is the default; dark follows the reader's
- * prefers-color-scheme. Only the palette changes between them — type, shape
- * and spacing are the same in both.
+ * One palette, and it is dark. A light theme existed, and was the default; it
+ * was never what this product looked right in. An instrument panel is dark
+ * because the reading matters more than the surface it is on, and that is what
+ * this screen is. Keeping a second theme nobody chose meant every colour
+ * carrying a value it was never seen in, and every new colour needing two.
  *
  * Breakpoints cannot be custom properties, so for the record they are:
  *   60rem  the rail becomes a top bar and the navigation a bottom tab bar
  *   40rem  side-by-side comparisons stack
  *   34rem  two-column lists and label/value rows stack
+ *   22rem  the account control keeps its avatar and drops its name
  */
 
 :root {
-  color-scheme: light;
+  color-scheme: dark;
 
-  /* ---------------------------------------------------------- palette, light
-     The rule for yellow on light: #f2c318 is a *surface* colour only (the
-     primary button, the badge, the YOU chip). Yellow as text uses
-     --accent-ink and yellow as a line uses --accent-rule, both darkened so
-     they hold contrast against the off-white field. On dark all three are
-     the same yellow. */
-  --bg: #ebeae5;            /* page field */
-  --card: #f7f6f2;          /* cards, panels, the rail's menus */
-  --nest: #ebeae5;          /* a record quoted inside another card */
-  --line: #d5d3cc;          /* every 1px border and rule */
-  --fg: #1d1f23;            /* primary text */
-  --sub: #55575c;           /* secondary text: byline verbs, descriptions */
-  --muted: #7c7e82;         /* tertiary text: timestamps, labels, captions */
+  /* ----------------------------------------------------------------- palette
+     Softened black fields, warm off-white ink, one safety yellow. The yellow
+     does three jobs and takes the same value in all three here: a surface (the
+     primary button, the badge, the YOU chip), text (--accent-ink) and a line
+     (--accent-rule). They stay three names because they are three jobs — on a
+     pale field the last two would have to darken, which is exactly the split
+     that made them separate names in the first place. */
+  --bg: #202226;          /* page field */
+  --card: #292b30;        /* cards, panels, rail menus */
+  --nest: #22242a;        /* a record quoted in another */
+  --line: #383b41;        /* every 1px border and rule */
+  --fg: #eeede8;          /* primary text */
+  --sub: #b4b5b0;         /* byline verbs, descriptions */
+  --muted: #8d8f8b;       /* timestamps, labels, captions */
 
-  --accent: #f2c318;        /* yellow as a surface */
-  --accent-ink: #a07a00;    /* yellow as text */
-  --accent-rule: #e6b400;   /* yellow as a line: active nav, seam, tab underline */
-  --accent-fg: #1d1f23;     /* ink on an accent surface */
-  --cta-bg: #1d1f23;        /* primary button — inverts on light */
-  --cta-fg: #f2c318;
+  --accent: #f2c318;      /* yellow as a surface */
+  --accent-ink: #f2c318;  /* yellow as text */
+  --accent-rule: #f2c318; /* yellow as a line */
+  --accent-fg: #202226;   /* ink on an accent surface */
+  --cta-bg: #f2c318;      /* primary button — inverts */
+  --cta-fg: #202226;
 
-  --pass: #1e7a4a;
-  --fail: #b3261e;
-  --warn: #8a6100;
-  --skip: #7c7e82;
-  --pass-bg: #e0efe4;
-  --fail-bg: #f8e3e0;
-  --warn-bg: #f7efd2;
-  --skip-bg: #e2e0da;       /* also the neutral hover wash */
+  --pass: #6fd39a;
+  --fail: #f0786a;
+  --warn: #e6b84a;
+  --skip: #8d8f8b;
+  --pass-bg: #1c3326;
+  --fail-bg: #3a201c;
+  --warn-bg: #33290f;
+  --skip-bg: #2f3136;     /* also the neutral hover wash */
 
-  --backdrop: rgba(20, 20, 22, .5);
+  /* The standing admonition's own bar: the card's value, so the notice the
+     whole page is qualified by reads as the frame around the demonstration
+     rather than as the first card in it. */
+  --marker-bg: #292b30;
+  --marker-ink: #b4b5b0;
+  --marker-strong: #eeede8;
+
+  --backdrop: rgba(0, 0, 0, .55);
   --on-color: #ffffff;      /* text on a saturated avatar or status colour */
 
   /* Derived washes: a hint of a colour over whatever is underneath, for a
@@ -165,36 +176,4 @@
 
   --focus-w: 2px;
   --focus-offset: 2px;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    color-scheme: dark;
-
-    --bg: #202226;
-    --card: #292b30;
-    --nest: #22242a;
-    --line: #383b41;
-    --fg: #eeede8;
-    --sub: #b4b5b0;
-    --muted: #8d8f8b;
-
-    --accent: #f2c318;
-    --accent-ink: #f2c318;
-    --accent-rule: #f2c318;
-    --accent-fg: #202226;
-    --cta-bg: #f2c318;
-    --cta-fg: #202226;
-
-    --pass: #6fd39a;
-    --fail: #f0786a;
-    --warn: #e6b84a;
-    --skip: #8d8f8b;
-    --pass-bg: #1c3326;
-    --fail-bg: #3a201c;
-    --warn-bg: #33290f;
-    --skip-bg: #2f3136;
-
-    --backdrop: rgba(0, 0, 0, .55);
-  }
 }

@@ -201,7 +201,7 @@ async function main() {
     const server = serve(
       { fetch: app.fetch, port: config.port, hostname: host },
       (info) => {
-        console.log(`OffWing web listening on [${host}]:${info.port}`)
+        console.log(`Offwing web listening on [${host}]:${info.port}`)
       },
     )
     server.on('error', (err: NodeJS.ErrnoException) => {

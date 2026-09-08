@@ -1,5 +1,5 @@
 /*
- * OffWing component styles.
+ * Offwing component styles.
  *
  * Everything here is written in terms of the tokens in tokens.css and nothing
  * else: no literal colours, typefaces, sizes or radii. If a value you need is
@@ -25,8 +25,13 @@ a { color: var(--accent-ink); }
    figures. It is never used for part names, body copy or table cells: those
    are things a reader has to read, and condensed capitals are for things a
    reader only has to recognise. */
+/* A page title is smaller than the brand, deliberately. They are the same
+   typeface in the same case, so at the same size they read as two headings
+   competing to be the name of the site — worst on a phone, where the brand
+   and the title sit within a couple of hundred pixels of each other. The
+   brand is 34/26; a title is one step down at 26/20. */
 h1, .t-display {
-  font: var(--w-bold) var(--fs-34)/var(--lh-tight) var(--font-display);
+  font: var(--w-bold) var(--fs-26)/var(--lh-tight) var(--font-display);
   text-transform: uppercase; letter-spacing: var(--track-display);
   margin: 0 0 var(--s-2);
 }
@@ -64,11 +69,14 @@ code, .mono { font-family: var(--font-mono); font-size: .875em; }
    There used to be three or four before any content; a warning repeated that
    often is read as furniture and stops working. */
 .marker {
-  background: var(--card); border-bottom: var(--bw-rule) solid var(--accent-rule);
-  font-size: var(--fs-13); color: var(--sub); text-align: center;
+  background: var(--marker-bg); border-bottom: var(--bw-rule) solid var(--accent-rule);
+  font-size: var(--fs-13); color: var(--marker-ink); text-align: center;
   padding: .45rem var(--gutter);
 }
-.marker strong { color: var(--fg); }
+.marker strong { color: var(--marker-strong); }
+/* On the dark bar the darkened yellow that links use on a pale field is
+   unreadable, so a link here takes the accent at full strength. */
+.marker a { color: var(--accent); }
 
 /* ------------------------------------------------------------------- feed */
 
@@ -637,18 +645,24 @@ main { padding: var(--s-5) 0 5rem; min-width: 0; }
   position: sticky; top: 0; padding: var(--s-4) 0;
   display: flex; flex-direction: column; gap: var(--rail-gap);
 }
-.rail .brand { display: block; text-decoration: none; color: inherit; padding: 0 var(--s-3); }
+.rail .mark { padding: 0 var(--s-3); }
+.rail .brand { display: block; text-decoration: none; color: inherit; }
 .brand {
   font: var(--w-bold) var(--fs-34)/var(--lh-tight) var(--font-display);
   text-transform: uppercase; letter-spacing: var(--track-display);
 }
-/* The tagline is sized to sit on one line inside the rail: thirty-four mono
-   characters against a fifteen-rem column leaves no room for tracking. */
-.rail .brand span {
-  display: block; margin-top: var(--s-2);
-  font: var(--w-regular) var(--fs-10)/1.4 var(--font-mono); color: var(--muted);
+/* The tagline is the only line on any screen that says what the site is, so
+   it is set to be read rather than to be noticed: the secondary ink and the
+   bold weight, not the tertiary ink at regular. Space Mono is monospaced, so
+   bold costs no width. Its size holds it on one line inside the rail —
+   thirty-four mono characters against a fifteen-rem column leave no room for
+   more. */
+.rail .tagline {
+  margin: var(--s-2) 0 0;
+  font: var(--w-bold) var(--fs-10)/1.4 var(--font-mono); color: var(--sub);
   letter-spacing: var(--track-display); text-transform: uppercase; white-space: nowrap;
 }
+
 .rail nav { display: flex; flex-direction: column; gap: var(--nav-gap); }
 /* The active item is marked by a rule down its left edge rather than a fill.
    The transparent rule on every item keeps the text from shifting. */
@@ -659,7 +673,8 @@ main { padding: var(--s-5) 0 5rem; min-width: 0; }
 }
 .rail nav a:hover { background: var(--skip-bg); }
 .rail nav a.on { color: var(--fg); font-weight: var(--w-semibold); border-left-color: var(--accent-rule); }
-.rail nav a .ico { width: 1.05rem; text-align: center; opacity: .75; }
+.rail nav a .ico { display: grid; place-items: center; opacity: .8; }
+.rail nav a.on .ico { opacity: 1; color: var(--accent-ink); }
 .rail nav a .badge {
   margin-left: auto; font: var(--w-bold) var(--fs-11)/1.7 var(--font-mono);
   background: var(--cta-bg); color: var(--cta-fg); border-radius: var(--r-inner);
@@ -766,7 +781,7 @@ main { padding: var(--s-5) 0 5rem; min-width: 0; }
 .account .who { display: flex; align-items: center; gap: var(--s-3); }
 .account .av { width: var(--av-xl); height: var(--av-xl); font-size: var(--fs-16); }
 .account .ident { min-width: 0; }
-.account .ident h1 { font-size: var(--fs-34); margin: 0; overflow-wrap: anywhere; }
+.account .ident h1 { font-size: var(--fs-26); margin: 0; overflow-wrap: anywhere; }
 .account .ident .role { color: var(--sub); font-size: var(--fs-15); }
 /* The handle is a domain the organization proved control of through DNS, which
    is the load-bearing half of the identity — so it gets its own line at full
@@ -783,10 +798,16 @@ main { padding: var(--s-5) 0 5rem; min-width: 0; }
   padding-top: var(--s-3); border-top: var(--bw) solid var(--line);
 }
 .account .facts > div { display: flex; align-items: baseline; gap: var(--s-2); min-width: 0; }
+/* Each fact carries a note saying what it is, so the label is marked as a
+   term with a definition rather than left as a caption a reader is assumed to
+   know. The dotted rule is the affordance; the pointer confirms it. */
+.account .facts > div { cursor: help; }
 .account .facts dt {
   font: var(--w-bold) var(--fs-10)/var(--lh-body) var(--font-mono); letter-spacing: var(--track-label-wide);
   color: var(--muted); text-transform: uppercase; white-space: nowrap;
+  border-bottom: var(--bw) dotted var(--line);
 }
+.account .facts > div:hover dt { color: var(--sub); border-bottom-color: var(--sub); }
 .account .facts dd { margin: 0; font-family: var(--font-mono); font-size: var(--fs-13); word-break: break-all; }
 /* Counts, not a score. Three numbers with the sentence that says what each one
    is, because "5 of 12" over a shop means nothing without "checked by someone
@@ -807,7 +828,6 @@ main { padding: var(--s-5) 0 5rem; min-width: 0; }
   font: var(--w-regular) var(--fs-11)/var(--lh-body) var(--font-mono); color: var(--muted);
   text-transform: uppercase; letter-spacing: var(--track-label);
 }
-.account .selfsaid { margin: var(--s-3) 0 0; font-size: var(--fs-12); color: var(--muted); }
 .account .noprofile {
   margin: var(--s-3) 0 0; padding-top: var(--s-3); border-top: var(--bw) solid var(--line);
   font-size: var(--fs-13); color: var(--muted);
@@ -958,35 +978,46 @@ a.tag:hover { border-bottom-color: var(--accent-ink); }
 .compare.differ .cnote strong { color: var(--fail); }
 @media (max-width: 40rem) { .compare { grid-template-columns: 1fr; } }
 
-/* --------------------------------------------------------------- composer */
+/* ------------------------------------------------- dialogs: composer, about
 
-dialog#composer {
+   Two boxes, one shape. The composer holds a certificate being written and
+   the about box holds four paragraphs, so only their bodies differ. */
+
+dialog {
   width: min(var(--dialog-w), calc(100vw - 2rem)); max-height: 86vh; padding: 0;
   border: var(--bw) solid var(--line); border-radius: var(--r-dialog);
   background: var(--card); color: var(--fg); overflow: hidden;
   box-shadow: var(--shadow-dialog);
 }
-dialog#composer::backdrop { background: var(--backdrop); }
-dialog#composer .chead {
+dialog::backdrop { background: var(--backdrop); }
+dialog .chead {
   display: flex; align-items: center; gap: var(--s-3);
   padding: .875rem 1.125rem; border-bottom: var(--bw) solid var(--line);
 }
-dialog#composer .chead strong {
+dialog .chead strong {
   font: var(--w-bold) var(--fs-20)/var(--lh-tight) var(--font-display);
   text-transform: uppercase; letter-spacing: var(--track-display);
 }
-dialog#composer .chead .chip { margin-left: auto; }
-dialog#composer .chead form { margin: 0; }
+dialog .chead .chip { margin-left: auto; }
+dialog .chead form { margin: 0; margin-left: auto; }
+dialog .chead .chip + form { margin-left: 0; }
 /* The close: a bare mark, not a boxed action. */
-dialog#composer .chead .close {
+dialog .chead .close {
   border: 0; padding: 0 var(--s-1); font: var(--w-regular) var(--fs-20)/1 var(--font-body);
   color: var(--muted); background: none;
 }
-dialog#composer .chead .close:hover { color: var(--fg); background: none; }
-dialog#composer .cbody { padding: var(--s-4) 1.125rem; overflow-y: auto; max-height: calc(86vh - 3.75rem); }
+dialog .chead .close:hover { color: var(--fg); background: none; }
+dialog .cbody { padding: var(--s-4) 1.125rem; overflow-y: auto; max-height: calc(86vh - 3.75rem); }
 /* The page served into the dialog carries its own title, which the header
    already gave; inside the box it reads as a subheading. */
-dialog#composer .cbody h1 { font-size: var(--fs-26); }
+dialog .cbody h1 { font-size: var(--fs-22); }
+/* The about box is prose, which the rest of the app has almost none of. It is
+   narrower than the composer because a line of text is only comfortable for
+   so long, and the box itself is the measure rather than a narrow column
+   inside a wide box. Its first section label should not push off the top. */
+dialog#about { width: min(34rem, calc(100vw - 2rem)); }
+dialog#about .cbody h2:first-child { margin-top: 0; }
+dialog#about .cbody p { margin: 0 0 var(--s-2); }
 /* A small mono tag: DRAFT on the composer, and anywhere else a state needs
    naming without colouring. */
 .chip {
@@ -994,15 +1025,6 @@ dialog#composer .cbody h1 { font-size: var(--fs-26); }
   letter-spacing: var(--track-label); color: var(--muted);
   border: var(--bw) solid var(--line); border-radius: var(--r-inner); padding: .15rem var(--s-2);
 }
-
-/* the compose row at the top of the feed */
-.compose-row {
-  display: flex; align-items: center; gap: var(--s-3); width: 100%;
-  background: var(--card); border: var(--bw) solid var(--line); border-radius: var(--r-card);
-  padding: var(--s-3) .875rem; margin-bottom: var(--feed-gap); cursor: pointer;
-  color: var(--muted); font-size: var(--fs-16); text-decoration: none;
-}
-.compose-row:hover { border-color: var(--accent-rule); }
 
 /* Desktop shows the long label; the tab bar's short one stays out of the way. */
 .rail nav a .tab, .rail .newpost .tab { display: none; }
@@ -1017,17 +1039,38 @@ dialog#composer .cbody h1 { font-size: var(--fs-26); }
  */
 @media (max-width: 60rem) {
   .app { grid-template-columns: minmax(0, 1fr); gap: 0; }
-  h1 { font-size: var(--fs-26); }
+  h1 { font-size: var(--fs-20); }
   .marker { font-size: var(--fs-12); padding: .4rem var(--s-3); }
 
-  /* The rail becomes a top bar holding only identity. */
+  /*
+   * The rail becomes a top bar of two rows:
+   *
+   *   Offwing                      [identity]
+   *   FAA 8130-3 CERTIFICATES…     [info] [theme]
+   *
+   * The tagline used to be hidden here, which left a phone visitor with a
+   * six-letter invented word and no statement anywhere on the screen of what
+   * the site is. It is the one line that answers that, so it gets a row of
+   * its own rather than the sliver left beside the account control.
+   *
+   * A grid rather than a wrapping flex row because the tagline has to span
+   * both columns while the brand and the identity share the row above it.
+   * .mark is display:contents so its three children are the grid's items.
+   */
   .rail {
-    position: static; height: auto; flex-direction: row; align-items: center;
-    gap: var(--s-2); padding: .55rem 0; border-bottom: var(--bw) solid var(--line);
+    position: static; height: auto; display: grid; align-items: center;
+    grid-template-columns: minmax(0, 1fr) auto; column-gap: var(--s-2); row-gap: .15rem;
+    padding: .55rem 0; border-bottom: var(--bw) solid var(--line);
   }
-  .rail .brand { padding: 0; }
+  .rail .mark { display: contents; }
+  .rail .brand { grid-area: 1 / 1; }
   .brand { font-size: var(--fs-26); }
-  .rail .brand br, .rail .brand span { display: none; }
+  /* The tagline takes the whole second row, rather than the column the
+     account control's width decides — that column is what is left after a
+     long organisation name, which is not enough for a line of text. */
+  .rail .tagline {
+    grid-area: 2 / 1 / 3 / -1; white-space: normal; font-size: var(--fs-11);
+  }
 
   /* And the links become a tab bar pinned to the bottom of the viewport. The
      active item's rule moves from its left edge to its top edge. */
@@ -1045,7 +1088,8 @@ dialog#composer .cbody h1 { font-size: var(--fs-26); }
   }
   .rail nav a:hover { background: none; }
   .rail nav a.on { color: var(--fg); border-top-color: var(--accent-rule); }
-  .rail nav a .ico { font-size: var(--fs-18); opacity: 1; width: auto; }
+  .rail nav a .ico { opacity: 1; }
+  .rail nav a .ico .ico-svg { width: 1.3rem; height: 1.3rem; }
   .rail nav a .full { display: none; }
   .rail nav a .tab { display: block; }
 
@@ -1061,15 +1105,19 @@ dialog#composer .cbody h1 { font-size: var(--fs-26); }
     position: fixed; right: var(--s-4); z-index: 21; margin: 0; padding: 0;
     bottom: calc(4.1rem + env(safe-area-inset-bottom, 0px));
     width: 3.4rem; height: 3.4rem; border-radius: var(--r-pill);
-    display: grid; place-items: center; font-size: var(--fs-26); font-weight: var(--w-medium);
+    display: grid; place-items: center;
     box-shadow: var(--shadow-float);
   }
   .rail .newpost .full { display: none; }
   .rail .newpost .tab { display: block; line-height: 1; }
+  .rail .newpost .tab .ico-svg { width: 1.6rem; height: 1.6rem; }
   .rail .newpost.off { box-shadow: none; }
 
   /* Identity sits at the top right, and its menu drops from there. */
-  .me { margin: 0 0 0 auto; position: relative; border-top: 0; padding-top: 0; }
+  .me {
+    grid-area: 1 / 2; position: relative; justify-self: end;
+    border-top: 0; padding-top: 0;
+  }
   .me > summary { padding: var(--s-1) .3rem; }
   .me .av { width: var(--av-md); height: var(--av-md); font-size: var(--fs-11); }
   .me .who b { max-width: 8.5rem; }
@@ -1080,16 +1128,16 @@ dialog#composer .cbody h1 { font-size: var(--fs-26); }
 
   /* The profile header at phone width: the name is long and the avatar is
      not, so the type steps down rather than wrapping three deep. */
-  .account .ident h1 { font-size: var(--fs-26); }
+  .account .ident h1 { font-size: var(--fs-20); }
   .account .counts { gap: .35rem var(--s-5); }
 
   /* Cards keep the desktop padding on the long axis and give a little back
      on the short one. */
   .event, .post, .account, .compare { padding: var(--s-4) var(--s-3); }
 
-  /* The composer takes the whole width of a phone. */
-  dialog#composer { width: calc(100vw - 1rem); max-height: 92vh; }
-  dialog#composer .cbody { max-height: calc(92vh - 3.75rem); padding: var(--s-3); }
+  /* A dialog takes the whole width of a phone. */
+  dialog { width: calc(100vw - 1rem); max-height: 92vh; }
+  dialog .cbody { max-height: calc(92vh - 3.75rem); padding: var(--s-3); }
 
   /* Tables give back some of their padding so three columns fit a phone;
      past that the card still scrolls sideways. */
@@ -1101,10 +1149,25 @@ dialog#composer .cbody h1 { font-size: var(--fs-26); }
   main { padding-bottom: 7rem; }
 }
 
+/* Narrower than any phone this was drawn for, or any width at all when the
+   condensed face never arrives: the brand and the account control are both as
+   wide as their own text, and past this point they meet. The control keeps
+   its avatar and drops its name, which the menu still carries. */
+@media (max-width: 22rem) {
+  .me .who { display: none; }
+}
+
 /* The 8130-3 has four columns of blocks because the paper does. On a phone
    four columns is nine characters wide each, so the sheet folds to two and
    a block that spanned the row still spans the row. */
 @media (max-width: 34rem) {
+  /* A narrow phone, or any phone whose reader never got the condensed face:
+     the brand and the account control are both as wide as their text, and at
+     this width the two meet in the middle. */
+  .brand { font-size: var(--fs-22); }
+  .me .who b { max-width: 6.5rem; }
+  .rail .tagline { padding-right: 4rem; }
+
   .grid { grid-template-columns: repeat(2, 1fr); }
   .blk.span4 { grid-column: span 2; }
   .leaves { grid-template-columns: repeat(4, 1fr); }

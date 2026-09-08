@@ -1761,7 +1761,7 @@ describe('the shape on a phone', () => {
     // A circle has room for a plus and not for two words, but the control
     // still has to announce itself.
     assert.match(body, /aria-label="Create release"/)
-    assert.match(body, /<span class="tab">\+<\/span>/)
+    assert.match(body, /<span class="tab"><svg class="ico-svg"/)
   })
 
   test('the phone layout is a breakpoint, not a second page', async () => {
@@ -1772,6 +1772,160 @@ describe('the shape on a phone', () => {
     assert.equal((body.match(/<nav>/g) ?? []).length, 1)
     assert.match(body, /@media \(max-width: 60rem\)/)
     assert.match(body, /position: fixed; left: 0; right: 0; bottom: 0/)
+  })
+})
+
+describe('the chrome tells a first-time visitor what this is', () => {
+  /**
+   * The tagline is the only line on any screen that says what the site is
+   * about, and on a phone it was the one thing the layout dropped — leaving a
+   * visitor with an invented six-letter word and a feed of certificates.
+   *
+   * These assert the markup and the rule that places it. The width itself is
+   * checked by rendering, which a unit test cannot do.
+   */
+  test('the tagline survives the phone layout', async () => {
+    const { app } = await feedApp((i) => i.addRelease(release()))
+    const body = await (await app.request('/')).text()
+
+    assert.match(body, /<p class="tagline">FAA 8130-3 certificates on atproto<\/p>/)
+
+    // Placed on its own row of the top bar rather than hidden, which is what
+    // the old rule did.
+    assert.match(body, /\.rail \.tagline \{\n\s*grid-area: 2 \/ 1 \/ 3 \/ -1;/)
+    assert.ok(
+      !/\.rail \.brand br, \.rail \.brand span \{ display: none/.test(body),
+      'the phone layout is hiding the tagline again',
+    )
+  })
+
+  test('what this is has a page, and the navigation leads to it', async () => {
+    const { app } = await feedApp()
+
+    // A navigation entry rather than an icon between the tagline and the
+    // links, which is a place nobody looks. Two labels like every other
+    // entry, because a rail and a tab bar want different words.
+    const body = await (await app.request('/')).text()
+    assert.match(
+      body,
+      /<a href="\/about" class=""><span class="ico"><svg[^>]*>.*?<\/svg><\/span>\s*<span class="full">More info<\/span><span class="tab">Info<\/span><\/a>/s,
+    )
+
+    const page = await app.request('/about')
+    assert.equal(page.status, 200)
+    const about = await page.text()
+    for (const claim of [
+      'attributed to a real, reputable repair station that never issued it',
+      'Forging one takes',
+      'never reach the network',
+      'not an airworthiness system',
+    ]) {
+      assert.ok(about.includes(claim), `/about is missing: ${claim}`)
+    }
+    // And it lights its own entry while you are on it.
+    assert.match(about, /<a href="\/about" class="on">/)
+  })
+
+  test('the primary action is offered once', async () => {
+    const { net } = await demoNetwork(DOMAIN)
+    const index = new MemoryIndex()
+    const writer = new MemoryRecordWriter(net, index, demoActors(DOMAIN))
+    const app = createApp({ resolver: net, repo: net, index, writer, mode: 'live' })
+    const body = await (await app.request('/')).text()
+
+    // The feed used to open with a compose row as well, which is the rail's
+    // own button restated two inches away — and on a phone, restated a third
+    // time by the floating one. One control, one place.
+    // The script's own '[data-compose]' selector is a mention of the
+    // attribute rather than a second control, so it is not counted.
+    assert.equal(
+      (body.match(/data-compose(?!\])/g) ?? []).length,
+      1,
+      'the way in is offered more than once',
+    )
+    assert.ok(!body.includes('compose-row'), 'the compose row is back')
+  })
+
+  /**
+   * There was a toggle, and two palettes behind it. The product is an
+   * instrument panel: it was only ever right in the dark one, and keeping the
+   * other meant every colour carrying a value nobody saw.
+   */
+  test('there is one theme, and nothing offers to change it', async () => {
+    const { app } = await feedApp()
+    const body = await (await app.request('/')).text()
+
+    assert.match(body, /color-scheme: dark;/)
+    assert.ok(!body.includes('light-dark('), 'a second palette is back')
+    assert.ok(!body.includes('data-theme'), 'the toggle\'s attribute is back')
+    assert.ok(!body.includes('prefers-color-scheme'), 'the page still asks')
+    assert.ok(!body.includes('offwing.theme'), 'a stored choice is back')
+    assert.ok(!/id="theme"/.test(body), 'the control is back')
+  })
+
+  test('the tab says what the page is, and the icon is drawn rather than fetched', async () => {
+    const { app } = await feedApp()
+    const body = await (await app.request('/')).text()
+
+    assert.match(body, /<title>Feed - Offwing<\/title>/)
+    assert.match(body, /<link rel="icon" href="data:image\/svg\+xml,/)
+    assert.match(body, /<meta name="description" content="FAA 8130-3 certificates on atproto">/)
+  })
+
+  /**
+   * The name is Offwing. It was OffWing, and a product whose own tab spells it
+   * two ways has two names.
+   */
+  test('every tab names the page and then the product, spelled one way', async () => {
+    const { app } = await feedApp()
+    const expected: Record<string, string> = {
+      '/': 'Feed',
+      '/parts': 'Issuers',
+      '/verify': 'Verify',
+      '/about': 'More info',
+    }
+    for (const [path, page] of Object.entries(expected)) {
+      const body = await (await app.request(path)).text()
+      assert.match(
+        body,
+        new RegExp(`<title>${page} - Offwing</title>`),
+        `${path} does not title itself "${page} - Offwing"`,
+      )
+      assert.ok(!body.includes('OffWing'), `${path} still spells it OffWing`)
+    }
+  })
+})
+
+describe('what a page says it is for', () => {
+  test('the issuers page names the table once', async () => {
+    const { app } = await feedApp((i) => i.addRelease(release()))
+    const body = await (await app.request('/parts')).text()
+
+    assert.match(
+      body,
+      /Every organization who has published a certificate to the network\./,
+    )
+    // The page has one table and the title already named it.
+    assert.ok(!body.includes('Who is publishing'), 'the third naming is back')
+  })
+
+  test('receiving says what arrived and what to do with it', async () => {
+    const { net } = await demoNetwork(DOMAIN)
+    const index = new MemoryIndex()
+    const writer = new MemoryRecordWriter(net, index, demoActors(DOMAIN))
+    const app = createApp({
+      resolver: net, repo: net, index, writer, dock: new Dock(), mode: 'live',
+    })
+    const body = await (
+      await app.request('/inbox', {
+        headers: { cookie: `f8130_actor=example-air.${DOMAIN}` },
+      })
+    ).text()
+
+    assert.match(
+      body,
+      /Incoming packages delivered to your organization\. Verify the 8130 paper\s+copy matches the record published to the network by the issuer\./,
+    )
   })
 })
 

@@ -27,9 +27,8 @@ import type { Actor } from './writer.js'
  * The stylesheet, inlined into every page.
  *
  * Two files under styles/: tokens.css is the design system — every colour,
- * typeface, size, radius, shadow and duration the interface may use, in both
- * themes — and app.css is the components, written only in terms of those
- * tokens. They are read once at startup and served inside a <style> element,
+ * typeface, size, radius, shadow and duration the interface may use — and
+ * app.css is the components, written only in terms of those tokens. They are read once at startup and served inside a <style> element,
  * so a page is still a single request and works with no build step. The
  * fonts are the one thing fetched from elsewhere.
  */
@@ -50,10 +49,35 @@ const FONTS_URL =
   '&family=Space+Mono:wght@400;700' +
   '&display=swap'
 
+/**
+ * What the site is, in one line.
+ *
+ * Here rather than inline in the markup because it is used three times: under
+ * the brand, as the page description a search engine or a chat client shows,
+ * and nowhere else it may drift from.
+ */
+const TAGLINE = 'FAA 8130-3 certificates on atproto'
+
+/**
+ * The tab icon: a swept wing in safety yellow, drawn rather than fetched.
+ *
+ * A data URI keeps the promise the stylesheet makes — a page is one request,
+ * with the fonts as the single exception — and a favicon that 404s is the
+ * first thing a browser tells a visitor about a site.
+ */
+const FAVICON =
+  'data:image/svg+xml,' +
+  encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">' +
+      '<rect width="32" height="32" rx="5" fill="#f2c318"/>' +
+      '<path d="M4 22 28 7l-9 15z" fill="#1d1f23"/>' +
+      '</svg>',
+  )
+
 export type Mode = 'demo' | 'live'
 
 /** Which rail entry is lit. */
-export type NavKey = 'home' | 'inbox' | 'issuers' | 'profile' | null
+export type NavKey = 'home' | 'inbox' | 'issuers' | 'profile' | 'about' | null
 
 /**
  * The one piece of per-request state every page shares: who the visitor is
@@ -150,6 +174,39 @@ const ICONS: Record<string, string> = {
     '<path d="M12 22V12"/><polyline points="3.29 7 12 12 20.71 7"/><path d="m7.5 4.27 9 5.15"/>',
   // chevron-down
   chevron: '<path d="m6 9 6 6 6-6"/>',
+
+  /* The navigation, one icon per question. These used to be Unicode glyphs —
+     ◎ ⤓ ▤ ☉ — which render at whatever weight and baseline each platform
+     happens to have for them, and on a phone they were the largest thing in
+     the tab bar and the least legible. Lucide paths sit on the same 24-unit
+     box and 2-unit stroke as every other icon here, so the bar is drawn in
+     one hand. */
+  // radio-tower: what is being published. The rss mark reads as a wifi
+  // symbol, which is a connection rather than a broadcast.
+  feed:
+    '<path d="M4.9 16.1C1 12.2 1 5.8 4.9 1.9"/>' +
+    '<path d="M7.8 4.7a6.14 6.14 0 0 0-.8 7.5"/>' +
+    '<circle cx="12" cy="9" r="2"/>' +
+    '<path d="M16.2 4.8c2 2 2.26 5.11.8 7.47"/>' +
+    '<path d="M19.1 1.9a9.96 9.96 0 0 1 0 14.1"/>' +
+    '<path d="M9.5 18h5"/><path d="m8 22 4-11 4 11"/>',
+  // inbox: what is waiting on me
+  inbox:
+    '<polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/>' +
+    '<path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>',
+  // list: who is publishing, and how much of it anybody has checked
+  list:
+    '<path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/>' +
+    '<path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/>',
+  // factory: an organization's own page. Every account here is a shop, a
+  // manufacturer, an airline or a broker — never a person.
+  factory:
+    '<path d="M2 20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8l-7 5V8l-7 5V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/>' +
+    '<path d="M17 18h1"/><path d="M12 18h1"/><path d="M7 18h1"/>',
+  // plus: the primary action, on the compose row and the phone's floating button
+  plus: '<path d="M5 12h14"/><path d="M12 5v14"/>',
+  // info: what this whole thing is
+  info: '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>',
 }
 
 export function icon(name: string) {
@@ -159,6 +216,47 @@ export function icon(name: string) {
       (ICONS[name] ?? '') +
       `</svg>`,
   )
+}
+
+/**
+ * What this is, in four paragraphs.
+ *
+ * Here rather than in views.ts because the navigation entry that leads to it
+ * is in this file, and because it is the shell's answer to a question the
+ * shell raises: a visitor who arrives on the feed with no idea what a release
+ * certificate is has nothing else to read — the rail's tagline names the
+ * subject and does not explain the problem.
+ */
+export function aboutProse() {
+  return html`<h2>The problem</h2>
+    <p>
+      A part arrives in a crate with a certificate. The fraud that matters in
+      aviation parts is not somebody editing a shared record — it is a document
+      attributed to a real, reputable repair station that never issued it.
+    </p>
+    <h2>What this does about it</h2>
+    <p>
+      A station's handle is its own DNS-verified domain, and its records are
+      signed by keys in its own identity document. A release certificate counts
+      as real only when a matching record sits in that station's own
+      repository. Forging one takes the station's domain <em>and</em> its
+      signing key, not a PDF editor.
+    </p>
+    <h2>Without publishing the shop's business</h2>
+    <p>
+      What the shop did and what it found never reach the network. The public
+      record carries only what identifies the document, plus a single hash over
+      the whole of it; the rest travels with the part, exactly as paperwork does
+      today. Anyone can check who signed. Nobody learns what was done.
+    </p>
+    <h2>And none of it is real</h2>
+    <p>
+      Every organization, part number and certificate here is invented. This is
+      a demonstration of a protocol, not an airworthiness system, and a green
+      check on this site says a signature held — never that a part is safe to
+      fit. The <a href="https://github.com/cldixon/offwing">project README</a>
+      works the whole scheme through.
+    </p>`
 }
 
 /**
@@ -413,7 +511,9 @@ export function layout(
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>${title} · OffWing</title>
+<title>${title} - Offwing</title>
+<meta name="description" content="${TAGLINE}">
+<link rel="icon" href="${FAVICON}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="${FONTS_URL}">
@@ -429,7 +529,14 @@ export function layout(
 </div>
 <div class="app">
   <aside class="rail">
-    <a class="brand" href="/">OffWing<br><span>FAA 8130-3 certificates on atproto</span></a>
+    <!-- The brand and what the site is. One block, because on a phone the
+         rail is a top bar and these have to lay themselves out as a grid;
+         .mark is display:contents there so its children become the grid's
+         own items. -->
+    <div class="mark">
+      <a class="brand" href="/">Offwing</a>
+      <p class="tagline">${TAGLINE}</p>
+    </div>
     <!-- Each entry answers a different question. Feed: what is happening.
          Receiving: what is waiting on me. Issuers: who is publishing, and how
          much of it anybody has vouched for. Profile: what I have signed.
@@ -445,10 +552,10 @@ export function layout(
          words. Both are in the markup rather than one derived from the other,
          so a screen reader gets a real label either way. -->
     <nav>
-      <a href="/" class="${on('home')}"><span class="ico">◎</span>
+      <a href="/" class="${on('home')}"><span class="ico">${icon('feed')}</span>
         <span class="full">Feed</span><span class="tab">Feed</span></a>
       ${me
-        ? html`<a href="/inbox" class="${on('inbox')}"><span class="ico">⤓</span>
+        ? html`<a href="/inbox" class="${on('inbox')}"><span class="ico">${icon('inbox')}</span>
             <span class="full">Receiving</span><span class="tab">Receiving</span>
             <!-- Always in the markup, hidden at zero, so the live stream has
                  something to write into rather than a node it has to create in
@@ -457,23 +564,30 @@ export function layout(
               >${chrome?.waiting ?? 0}</span>
           </a>`
         : ''}
-      <a href="/parts" class="${on('issuers')}"><span class="ico">▤</span>
+      <a href="/parts" class="${on('issuers')}"><span class="ico">${icon('list')}</span>
         <span class="full">Issuers</span><span class="tab">Issuers</span></a>
       <!-- Only when somebody is signed in, because the public is not an
            organization and has no repository to show. -->
       ${me
         ? html`<a href="/profile/${encodeURIComponent(me.handle)}"
-            class="${on('profile')}"><span class="ico">☉</span>
+            class="${on('profile')}"><span class="ico">${icon('factory')}</span>
             <span class="full">Profile</span><span class="tab">Profile</span></a>`
         : ''}
+      <!-- Last, and a destination rather than a dialog. It was an icon
+           floating between the tagline and the navigation, which is a place
+           nobody looks; the one screen that says what any of this is for
+           should be somewhere a visitor is already reading. -->
+      <a href="/about" class="${on('about')}"><span class="ico">${icon('info')}</span>
+        <span class="full">More info</span><span class="tab">Info</span></a>
     </nav>
     ${actors.length > 0
       ? me
         ? html`<a href="/issue" class="newpost" ${withComposer ? 'data-compose' : ''}
             aria-label="Create release"><span class="full">Create release</span
-            ><span class="tab">+</span></a>`
+            ><span class="tab">${icon('plus')}</span></a>`
         : html`<span class="newpost off" title="The public cannot sign"
-            ><span class="full">Create release</span><span class="tab">+</span></span>`
+            ><span class="full">Create release</span
+            ><span class="tab">${icon('plus')}</span></span>`
       : ''}
     ${actors.length > 0 ? identity(chrome!) : ''}
   </aside>

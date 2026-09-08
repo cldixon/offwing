@@ -1,4 +1,4 @@
-# OffWing — verifiable release certificates on AT Protocol
+# Offwing — verifiable release certificates on AT Protocol
 
 > ## ⚠️ ALL DATA IN THIS REPOSITORY IS SYNTHETIC
 >
@@ -199,7 +199,7 @@ Complete as a demonstration. Built:
 | `commitment/` | Go implementation of the same commitment scheme |
 | `ingest/` | firehose consumer, signature verification, derived Postgres index |
 | `cmd/ingest/` | `run` and `reindex` commands |
-| `web/` | the AppView — feed, receiving, form view, part timeline, accounts, issuers, JSON API |
+| `web/` | the AppView — feed, receiving, form view, part timeline, accounts, issuers, what-this-is, JSON API |
 | `seed/` | one-shot job: 29 fictional organizations and the eight set pieces |
 | `watchdog/` | AppView B — an independent reader with its own index and its own questions |
 | `testdata/vectors.json` | the cross-language contract both cores must satisfy |
@@ -234,7 +234,7 @@ The interface has one design system and every screen is drawn from it:
 
 | | |
 |---|---|
-| `web/src/styles/tokens.css` | the vocabulary — palette for light and dark, type scale, radii, spacing, shadows, motion |
+| `web/src/styles/tokens.css` | the vocabulary — palette, type scale, radii, spacing, shadows, motion |
 | `web/src/styles/app.css` | the components, written only in terms of those tokens |
 
 Neither the templates nor `app.css` carry a colour, typeface, size or radius of
@@ -243,6 +243,13 @@ read once at startup and inlined into every page, so a page is still a single
 request and there is no build step. The fonts — Barlow Condensed for display,
 Barlow for text, Space Mono for every identifier — are the one thing fetched
 from elsewhere, and each has a system fallback.
+
+There is one palette and it is dark. A light theme existed, was the default,
+and was never what this looked right in: the screen is an instrument panel, and
+a panel is dark because the reading matters more than the surface it sits on.
+Carrying the second theme meant every colour declaring a value nobody saw and
+every new colour needing two, so it is gone along with the control that
+switched between them.
 
 ```bash
 npm install && npm test        # TypeScript: commitment core + verification pipeline
