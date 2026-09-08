@@ -26,7 +26,7 @@ a { color: var(--accent-ink); }
    are things a reader has to read, and condensed capitals are for things a
    reader only has to recognise. */
 h1, .t-display {
-  font: var(--w-bold) var(--fs-40)/var(--lh-tight) var(--font-display);
+  font: var(--w-bold) var(--fs-34)/var(--lh-tight) var(--font-display);
   text-transform: uppercase; letter-spacing: var(--track-display);
   margin: 0 0 var(--s-2);
 }
@@ -1017,7 +1017,7 @@ dialog#composer .cbody h1 { font-size: var(--fs-26); }
  */
 @media (max-width: 60rem) {
   .app { grid-template-columns: minmax(0, 1fr); gap: 0; }
-  h1 { font-size: var(--fs-32); }
+  h1 { font-size: var(--fs-26); }
   .marker { font-size: var(--fs-12); padding: .4rem var(--s-3); }
 
   /* The rail becomes a top bar holding only identity. */
