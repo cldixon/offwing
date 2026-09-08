@@ -199,7 +199,7 @@ Complete as a demonstration. Built:
 | `commitment/` | Go implementation of the same commitment scheme |
 | `ingest/` | firehose consumer, signature verification, derived Postgres index |
 | `cmd/ingest/` | `run` and `reindex` commands |
-| `web/` | the AppView — feed, receiving, form view, part timeline, accounts, issuers, JSON API |
+| `web/` | the AppView — feed, receiving, form view, part timeline, accounts, issuers, what-this-is, JSON API |
 | `seed/` | one-shot job: 29 fictional organizations and the eight set pieces |
 | `watchdog/` | AppView B — an independent reader with its own index and its own questions |
 | `testdata/vectors.json` | the cross-language contract both cores must satisfy |
@@ -243,6 +243,15 @@ read once at startup and inlined into every page, so a page is still a single
 request and there is no build step. The fonts — Barlow Condensed for display,
 Barlow for text, Space Mono for every identifier — are the one thing fetched
 from elsewhere, and each has a system fallback.
+
+Every colour is one `light-dark(light, dark)` pair rather than a light block
+and a dark block that drift apart, so which theme is painted is decided by
+`color-scheme` alone. That makes the toggle in the rail a single attribute on
+`<html>`: with none set the page follows the reader's system, including when
+their system changes while the page is open, and a stored choice is applied in
+the head before the first paint so nobody who chose dark gets a white flash. A
+reader with scripting off never sees the control — it ships hidden — and keeps
+the system-following behaviour, which is what everybody had before it existed.
 
 ```bash
 npm install && npm test        # TypeScript: commitment core + verification pipeline

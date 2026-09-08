@@ -1761,7 +1761,7 @@ describe('the shape on a phone', () => {
     // A circle has room for a plus and not for two words, but the control
     // still has to announce itself.
     assert.match(body, /aria-label="Create release"/)
-    assert.match(body, /<span class="tab">\+<\/span>/)
+    assert.match(body, /<span class="tab"><svg class="ico-svg"/)
   })
 
   test('the phone layout is a breakpoint, not a second page', async () => {
@@ -1772,6 +1772,83 @@ describe('the shape on a phone', () => {
     assert.equal((body.match(/<nav>/g) ?? []).length, 1)
     assert.match(body, /@media \(max-width: 60rem\)/)
     assert.match(body, /position: fixed; left: 0; right: 0; bottom: 0/)
+  })
+})
+
+describe('the chrome tells a first-time visitor what this is', () => {
+  /**
+   * The tagline is the only line on any screen that says what the site is
+   * about, and on a phone it was the one thing the layout dropped — leaving a
+   * visitor with an invented six-letter word and a feed of certificates.
+   *
+   * These assert the markup and the rule that places it. The width itself is
+   * checked by rendering, which a unit test cannot do.
+   */
+  test('the tagline survives the phone layout', async () => {
+    const { app } = await feedApp((i) => i.addRelease(release()))
+    const body = await (await app.request('/')).text()
+
+    assert.match(body, /<p class="tagline">FAA 8130-3 certificates on atproto<\/p>/)
+
+    // Placed on its own row of the top bar rather than hidden, which is what
+    // the old rule did.
+    assert.match(body, /\.rail \.tagline \{\n\s*grid-area: 2 \/ 1 \/ 3 \/ -1;/)
+    assert.ok(
+      !/\.rail \.brand br, \.rail \.brand span \{ display: none/.test(body),
+      'the phone layout is hiding the tagline again',
+    )
+  })
+
+  test('the info button opens a box and degrades to a page', async () => {
+    const { app } = await feedApp()
+
+    const body = await (await app.request('/')).text()
+    // A link to a real page, upgraded by script rather than replaced by it.
+    assert.match(body, /<a class="tool" href="\/about" data-about/)
+    assert.match(body, /<dialog id="about">/)
+
+    // And the page it degrades to says the same thing, because both render
+    // the same prose.
+    const page = await app.request('/about')
+    assert.equal(page.status, 200)
+    const about = await page.text()
+    for (const claim of [
+      'attributed to a real, reputable repair station that never issued it',
+      'Forging one takes',
+      'never reach the network',
+      'not an airworthiness system',
+    ]) {
+      assert.ok(about.includes(claim), `/about is missing: ${claim}`)
+      assert.ok(body.includes(claim), `the dialog is missing: ${claim}`)
+    }
+  })
+
+  test('the theme toggle is a control that works before it is offered', async () => {
+    const { app } = await feedApp()
+    const body = await (await app.request('/')).text()
+
+    // Shipped hidden: a toggle with scripting off would do nothing at all,
+    // and those readers keep the system-following behaviour they had.
+    assert.match(body, /<button type="button" class="tool" id="theme" hidden/)
+    assert.match(body, /localStorage\.setItem\('offwing\.theme'/)
+
+    // Applied in the head, before the first paint, or a reader who chose dark
+    // gets a white page for a frame.
+    const head = body.slice(0, body.indexOf('</head>'))
+    assert.match(head, /localStorage\.getItem\('offwing\.theme'\)/)
+
+    // One attribute drives it, because every colour is a light-dark() pair.
+    assert.match(body, /:root\[data-theme="dark"\] \{ color-scheme: dark; \}/)
+    assert.match(body, /--bg: light-dark\(/)
+  })
+
+  test('the tab says what the page is, and the icon is drawn rather than fetched', async () => {
+    const { app } = await feedApp()
+    const body = await (await app.request('/')).text()
+
+    assert.match(body, /<title>Feed - OffWing<\/title>/)
+    assert.match(body, /<link rel="icon" href="data:image\/svg\+xml,/)
+    assert.match(body, /<meta name="description" content="FAA 8130-3 certificates on atproto">/)
   })
 })
 

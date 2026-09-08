@@ -25,8 +25,13 @@ a { color: var(--accent-ink); }
    figures. It is never used for part names, body copy or table cells: those
    are things a reader has to read, and condensed capitals are for things a
    reader only has to recognise. */
+/* A page title is smaller than the brand, deliberately. They are the same
+   typeface in the same case, so at the same size they read as two headings
+   competing to be the name of the site — worst on a phone, where the brand
+   and the title sit within a couple of hundred pixels of each other. The
+   brand is 34/26; a title is one step down at 26/20. */
 h1, .t-display {
-  font: var(--w-bold) var(--fs-34)/var(--lh-tight) var(--font-display);
+  font: var(--w-bold) var(--fs-26)/var(--lh-tight) var(--font-display);
   text-transform: uppercase; letter-spacing: var(--track-display);
   margin: 0 0 var(--s-2);
 }
@@ -64,11 +69,14 @@ code, .mono { font-family: var(--font-mono); font-size: .875em; }
    There used to be three or four before any content; a warning repeated that
    often is read as furniture and stops working. */
 .marker {
-  background: var(--card); border-bottom: var(--bw-rule) solid var(--accent-rule);
-  font-size: var(--fs-13); color: var(--sub); text-align: center;
+  background: var(--marker-bg); border-bottom: var(--bw-rule) solid var(--accent-rule);
+  font-size: var(--fs-13); color: var(--marker-ink); text-align: center;
   padding: .45rem var(--gutter);
 }
-.marker strong { color: var(--fg); }
+.marker strong { color: var(--marker-strong); }
+/* On the dark bar the darkened yellow that links use on a pale field is
+   unreadable, so a link here takes the accent at full strength. */
+.marker a { color: var(--accent); }
 
 /* ------------------------------------------------------------------- feed */
 
@@ -637,17 +645,39 @@ main { padding: var(--s-5) 0 5rem; min-width: 0; }
   position: sticky; top: 0; padding: var(--s-4) 0;
   display: flex; flex-direction: column; gap: var(--rail-gap);
 }
-.rail .brand { display: block; text-decoration: none; color: inherit; padding: 0 var(--s-3); }
+.rail .mark { padding: 0 var(--s-3); }
+.rail .brand { display: block; text-decoration: none; color: inherit; }
 .brand {
   font: var(--w-bold) var(--fs-34)/var(--lh-tight) var(--font-display);
   text-transform: uppercase; letter-spacing: var(--track-display);
 }
 /* The tagline is sized to sit on one line inside the rail: thirty-four mono
    characters against a fifteen-rem column leaves no room for tracking. */
-.rail .brand span {
-  display: block; margin-top: var(--s-2);
+.rail .tagline {
+  margin: var(--s-2) 0 0;
   font: var(--w-regular) var(--fs-10)/1.4 var(--font-mono); color: var(--muted);
   letter-spacing: var(--track-display); text-transform: uppercase; white-space: nowrap;
+}
+/* The two chrome controls: what this is, and which theme to paint it in.
+   Icon-sized and quiet, because neither is a destination. */
+.tools { display: flex; align-items: center; gap: var(--s-1); margin-top: var(--s-2); }
+.tool {
+  display: grid; place-items: center; width: 1.75rem; height: 1.75rem; padding: 0;
+  border: 0; border-radius: var(--r-inner); background: none; color: var(--muted);
+  cursor: pointer;
+}
+.tool:hover { background: var(--skip-bg); color: var(--fg); }
+.tool .ico-svg { width: 1.05rem; height: 1.05rem; }
+/* The toggle shows the theme it would switch to, which is the opposite of the
+   one being painted. With no stored choice there is no attribute, so the
+   system preference decides — the same question tokens.css asks. */
+.tool .t-sun { display: none; }
+.tool .t-moon { display: block; }
+:root[data-theme="dark"] .tool .t-sun { display: block; }
+:root[data-theme="dark"] .tool .t-moon { display: none; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) .tool .t-sun { display: block; }
+  :root:not([data-theme]) .tool .t-moon { display: none; }
 }
 .rail nav { display: flex; flex-direction: column; gap: var(--nav-gap); }
 /* The active item is marked by a rule down its left edge rather than a fill.
@@ -659,7 +689,8 @@ main { padding: var(--s-5) 0 5rem; min-width: 0; }
 }
 .rail nav a:hover { background: var(--skip-bg); }
 .rail nav a.on { color: var(--fg); font-weight: var(--w-semibold); border-left-color: var(--accent-rule); }
-.rail nav a .ico { width: 1.05rem; text-align: center; opacity: .75; }
+.rail nav a .ico { display: grid; place-items: center; opacity: .8; }
+.rail nav a.on .ico { opacity: 1; color: var(--accent-ink); }
 .rail nav a .badge {
   margin-left: auto; font: var(--w-bold) var(--fs-11)/1.7 var(--font-mono);
   background: var(--cta-bg); color: var(--cta-fg); border-radius: var(--r-inner);
@@ -766,7 +797,7 @@ main { padding: var(--s-5) 0 5rem; min-width: 0; }
 .account .who { display: flex; align-items: center; gap: var(--s-3); }
 .account .av { width: var(--av-xl); height: var(--av-xl); font-size: var(--fs-16); }
 .account .ident { min-width: 0; }
-.account .ident h1 { font-size: var(--fs-34); margin: 0; overflow-wrap: anywhere; }
+.account .ident h1 { font-size: var(--fs-26); margin: 0; overflow-wrap: anywhere; }
 .account .ident .role { color: var(--sub); font-size: var(--fs-15); }
 /* The handle is a domain the organization proved control of through DNS, which
    is the load-bearing half of the identity — so it gets its own line at full
@@ -958,35 +989,46 @@ a.tag:hover { border-bottom-color: var(--accent-ink); }
 .compare.differ .cnote strong { color: var(--fail); }
 @media (max-width: 40rem) { .compare { grid-template-columns: 1fr; } }
 
-/* --------------------------------------------------------------- composer */
+/* ------------------------------------------------- dialogs: composer, about
 
-dialog#composer {
+   Two boxes, one shape. The composer holds a certificate being written and
+   the about box holds four paragraphs, so only their bodies differ. */
+
+dialog {
   width: min(var(--dialog-w), calc(100vw - 2rem)); max-height: 86vh; padding: 0;
   border: var(--bw) solid var(--line); border-radius: var(--r-dialog);
   background: var(--card); color: var(--fg); overflow: hidden;
   box-shadow: var(--shadow-dialog);
 }
-dialog#composer::backdrop { background: var(--backdrop); }
-dialog#composer .chead {
+dialog::backdrop { background: var(--backdrop); }
+dialog .chead {
   display: flex; align-items: center; gap: var(--s-3);
   padding: .875rem 1.125rem; border-bottom: var(--bw) solid var(--line);
 }
-dialog#composer .chead strong {
+dialog .chead strong {
   font: var(--w-bold) var(--fs-20)/var(--lh-tight) var(--font-display);
   text-transform: uppercase; letter-spacing: var(--track-display);
 }
-dialog#composer .chead .chip { margin-left: auto; }
-dialog#composer .chead form { margin: 0; }
+dialog .chead .chip { margin-left: auto; }
+dialog .chead form { margin: 0; margin-left: auto; }
+dialog .chead .chip + form { margin-left: 0; }
 /* The close: a bare mark, not a boxed action. */
-dialog#composer .chead .close {
+dialog .chead .close {
   border: 0; padding: 0 var(--s-1); font: var(--w-regular) var(--fs-20)/1 var(--font-body);
   color: var(--muted); background: none;
 }
-dialog#composer .chead .close:hover { color: var(--fg); background: none; }
-dialog#composer .cbody { padding: var(--s-4) 1.125rem; overflow-y: auto; max-height: calc(86vh - 3.75rem); }
+dialog .chead .close:hover { color: var(--fg); background: none; }
+dialog .cbody { padding: var(--s-4) 1.125rem; overflow-y: auto; max-height: calc(86vh - 3.75rem); }
 /* The page served into the dialog carries its own title, which the header
    already gave; inside the box it reads as a subheading. */
-dialog#composer .cbody h1 { font-size: var(--fs-26); }
+dialog .cbody h1 { font-size: var(--fs-22); }
+/* The about box is prose, which the rest of the app has almost none of. It is
+   narrower than the composer because a line of text is only comfortable for
+   so long, and the box itself is the measure rather than a narrow column
+   inside a wide box. Its first section label should not push off the top. */
+dialog#about { width: min(34rem, calc(100vw - 2rem)); }
+dialog#about .cbody h2:first-child { margin-top: 0; }
+dialog#about .cbody p { margin: 0 0 var(--s-2); }
 /* A small mono tag: DRAFT on the composer, and anywhere else a state needs
    naming without colouring. */
 .chip {
@@ -995,14 +1037,35 @@ dialog#composer .cbody h1 { font-size: var(--fs-26); }
   border: var(--bw) solid var(--line); border-radius: var(--r-inner); padding: .15rem var(--s-2);
 }
 
-/* the compose row at the top of the feed */
+/*
+ * The compose row at the top of the feed.
+ *
+ * It used to be a pale card with a placeholder in it — the text box a social
+ * client puts there — and on a page made of pale cards it read as the first
+ * item in the feed rather than as the one thing on the screen you can do. It
+ * is now shaped like what it is: the CTA's fill, the display face the rail's
+ * button uses, and a plus in a box at the front. The avatar stays, because it
+ * is also the answer to "who would this be signed by".
+ */
 .compose-row {
   display: flex; align-items: center; gap: var(--s-3); width: 100%;
-  background: var(--card); border: var(--bw) solid var(--line); border-radius: var(--r-card);
+  background: var(--card); border: var(--bw-tab) solid var(--accent-rule);
+  border-radius: var(--r-card);
   padding: var(--s-3) .875rem; margin-bottom: var(--feed-gap); cursor: pointer;
-  color: var(--muted); font-size: var(--fs-16); text-decoration: none;
+  color: var(--accent-ink); text-decoration: none;
+  font: var(--w-bold) var(--fs-18)/var(--lh-tight) var(--font-display);
+  text-transform: uppercase; letter-spacing: var(--track-cta);
 }
-.compose-row:hover { border-color: var(--accent-rule); }
+.compose-row:hover { background: var(--accent-wash); }
+/* The plus takes the accent as a fill, so the row ends in the same mark the
+   phone's floating button carries and the whole thing reads as one control
+   rather than as the first card in the feed. */
+.compose-row .plus {
+  display: grid; place-items: center; width: 1.75rem; height: 1.75rem; flex: 0 0 auto;
+  margin-left: auto; border-radius: var(--r-inner);
+  background: var(--accent); color: var(--accent-fg);
+}
+.compose-row .plus .ico-svg { width: 1.15rem; height: 1.15rem; }
 
 /* Desktop shows the long label; the tab bar's short one stays out of the way. */
 .rail nav a .tab, .rail .newpost .tab { display: none; }
@@ -1017,17 +1080,40 @@ dialog#composer .cbody h1 { font-size: var(--fs-26); }
  */
 @media (max-width: 60rem) {
   .app { grid-template-columns: minmax(0, 1fr); gap: 0; }
-  h1 { font-size: var(--fs-26); }
+  h1 { font-size: var(--fs-20); }
   .marker { font-size: var(--fs-12); padding: .4rem var(--s-3); }
 
-  /* The rail becomes a top bar holding only identity. */
+  /*
+   * The rail becomes a top bar of two rows:
+   *
+   *   OffWing                      [identity]
+   *   FAA 8130-3 CERTIFICATES…     [info] [theme]
+   *
+   * The tagline used to be hidden here, which left a phone visitor with a
+   * six-letter invented word and no statement anywhere on the screen of what
+   * the site is. It is the one line that answers that, so it gets a row of
+   * its own rather than the sliver left beside the account control.
+   *
+   * A grid rather than a wrapping flex row because the tagline has to span
+   * both columns while the brand and the identity share the row above it.
+   * .mark is display:contents so its three children are the grid's items.
+   */
   .rail {
-    position: static; height: auto; flex-direction: row; align-items: center;
-    gap: var(--s-2); padding: .55rem 0; border-bottom: var(--bw) solid var(--line);
+    position: static; height: auto; display: grid; align-items: center;
+    grid-template-columns: minmax(0, 1fr) auto; column-gap: var(--s-2); row-gap: .15rem;
+    padding: .55rem 0; border-bottom: var(--bw) solid var(--line);
   }
-  .rail .brand { padding: 0; }
+  .rail .mark { display: contents; }
+  .rail .brand { grid-area: 1 / 1; }
   .brand { font-size: var(--fs-26); }
-  .rail .brand br, .rail .brand span { display: none; }
+  /* Both take the whole second row and the tools sit on top of its right
+     end, rather than the tagline taking the column the account control's
+     width decides — that column is what is left after a long organisation
+     name, which is not enough for a line of text. */
+  .rail .tagline {
+    grid-area: 2 / 1 / 3 / -1; white-space: normal; padding-right: 4.25rem;
+  }
+  .rail .tools { grid-area: 2 / 1 / 3 / -1; margin: 0; justify-self: end; }
 
   /* And the links become a tab bar pinned to the bottom of the viewport. The
      active item's rule moves from its left edge to its top edge. */
@@ -1045,7 +1131,8 @@ dialog#composer .cbody h1 { font-size: var(--fs-26); }
   }
   .rail nav a:hover { background: none; }
   .rail nav a.on { color: var(--fg); border-top-color: var(--accent-rule); }
-  .rail nav a .ico { font-size: var(--fs-18); opacity: 1; width: auto; }
+  .rail nav a .ico { opacity: 1; }
+  .rail nav a .ico .ico-svg { width: 1.3rem; height: 1.3rem; }
   .rail nav a .full { display: none; }
   .rail nav a .tab { display: block; }
 
@@ -1061,15 +1148,16 @@ dialog#composer .cbody h1 { font-size: var(--fs-26); }
     position: fixed; right: var(--s-4); z-index: 21; margin: 0; padding: 0;
     bottom: calc(4.1rem + env(safe-area-inset-bottom, 0px));
     width: 3.4rem; height: 3.4rem; border-radius: var(--r-pill);
-    display: grid; place-items: center; font-size: var(--fs-26); font-weight: var(--w-medium);
+    display: grid; place-items: center;
     box-shadow: var(--shadow-float);
   }
   .rail .newpost .full { display: none; }
   .rail .newpost .tab { display: block; line-height: 1; }
+  .rail .newpost .tab .ico-svg { width: 1.6rem; height: 1.6rem; }
   .rail .newpost.off { box-shadow: none; }
 
   /* Identity sits at the top right, and its menu drops from there. */
-  .me { margin: 0 0 0 auto; position: relative; border-top: 0; padding-top: 0; }
+  .me { grid-area: 1 / 2; position: relative; border-top: 0; padding-top: 0; justify-self: end; }
   .me > summary { padding: var(--s-1) .3rem; }
   .me .av { width: var(--av-md); height: var(--av-md); font-size: var(--fs-11); }
   .me .who b { max-width: 8.5rem; }
@@ -1080,16 +1168,16 @@ dialog#composer .cbody h1 { font-size: var(--fs-26); }
 
   /* The profile header at phone width: the name is long and the avatar is
      not, so the type steps down rather than wrapping three deep. */
-  .account .ident h1 { font-size: var(--fs-26); }
+  .account .ident h1 { font-size: var(--fs-20); }
   .account .counts { gap: .35rem var(--s-5); }
 
   /* Cards keep the desktop padding on the long axis and give a little back
      on the short one. */
   .event, .post, .account, .compare { padding: var(--s-4) var(--s-3); }
 
-  /* The composer takes the whole width of a phone. */
-  dialog#composer { width: calc(100vw - 1rem); max-height: 92vh; }
-  dialog#composer .cbody { max-height: calc(92vh - 3.75rem); padding: var(--s-3); }
+  /* A dialog takes the whole width of a phone. */
+  dialog { width: calc(100vw - 1rem); max-height: 92vh; }
+  dialog .cbody { max-height: calc(92vh - 3.75rem); padding: var(--s-3); }
 
   /* Tables give back some of their padding so three columns fit a phone;
      past that the card still scrolls sideways. */
@@ -1105,6 +1193,13 @@ dialog#composer .cbody h1 { font-size: var(--fs-26); }
    four columns is nine characters wide each, so the sheet folds to two and
    a block that spanned the row still spans the row. */
 @media (max-width: 34rem) {
+  /* A narrow phone, or any phone whose reader never got the condensed face:
+     the brand and the account control are both as wide as their text, and at
+     this width the two meet in the middle. */
+  .brand { font-size: var(--fs-22); }
+  .me .who b { max-width: 6.5rem; }
+  .rail .tagline { padding-right: 4rem; }
+
   .grid { grid-template-columns: repeat(2, 1fr); }
   .blk.span4 { grid-column: span 2; }
   .leaves { grid-template-columns: repeat(4, 1fr); }

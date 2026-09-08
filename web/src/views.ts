@@ -19,7 +19,7 @@ import type {
   ReleaseRow,
 } from './index-port.js'
 import { bareLabel, fieldLabel } from './compose.js'
-import { avatar, icon, KIND_LABEL, layout, type Chrome, type Mode } from './shell.js'
+import { aboutProse, avatar, icon, KIND_LABEL, layout, type Chrome, type Mode } from './shell.js'
 import type { Arrival } from './dock.js'
 import type { Actor } from './writer.js'
 
@@ -93,6 +93,28 @@ function stageRow(s: Stage) {
       ${evidence}
     </div>
   </div>`
+}
+
+/**
+ * What this is, as a page.
+ *
+ * The info button in the rail opens a dialog holding exactly this prose; the
+ * page is what the button degrades to with scripting off, and what a link to
+ * an explanation can point at. Both render `aboutProse`, so there is one copy
+ * of the words.
+ */
+export function aboutPage(mode: Mode = 'live', chrome?: Chrome) {
+  return layout(
+    'What this is',
+    html`<h1>What this is</h1>
+      <p class="sub">
+        A demonstration of verifiable release certificates, and the problem
+        they exist to address.
+      </p>
+      <div class="card pad">${aboutProse()}</div>`,
+    mode,
+    chrome,
+  )
 }
 
 export function verifyPage(
@@ -1782,7 +1804,8 @@ export function feedPage(params: {
 
     ${me
       ? html`<a href="/issue" class="compose-row" data-compose>
-          ${avatar(me.displayName, true)} Release a part…
+          ${avatar(me.displayName, true)} Release a part
+          <span class="plus">${icon('plus')}</span>
         </a>`
       : ''}
 

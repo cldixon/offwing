@@ -36,6 +36,7 @@ import type {
   ReleaseRow,
 } from './index-port.js'
 import {
+  aboutPage,
   accountPage,
   dashboardPage,
   disclosePage,
@@ -643,7 +644,16 @@ export function createApp(deps: AppDeps) {
     )
   })
 
+  // ---------------------------------------------------------------- about
+  //
+  // For a visitor who arrived on a feed of certificates with no idea what one
+  // is. The rail's info button opens the same prose in a dialog and falls back
+  // to this page with scripting off.
+
+  app.get('/about', (c) => c.html(aboutPage(mode, chrome(c))))
+
   // --------------------------------------------------------------- verify
+
   app.get('/verify', (c) => c.html(verifyPage(mode, undefined, undefined, chrome(c))))
 
   app.post('/verify', async (c) => {
