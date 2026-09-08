@@ -41,7 +41,11 @@ async function main() {
   // Resolved before anything is described, so the log says what this process
   // is going to do rather than what it was asked to do.
   const mode = await resolveMode(config)
-  for (const line of describeConfig({ ...config, mode })) console.warn(line)
+  // Stdout, not stderr. Railway files anything on stderr as severity `error`,
+  // so a healthy boot used to report three errors and a reader looking for a
+  // real one had four candidates. What this process is doing is news; only
+  // something it cannot do is a warning.
+  for (const line of describeConfig({ ...config, mode })) console.log(line)
 
   const domain = process.env.PDS_HOSTNAME ?? 'f8130.cldixon.dev'
 
@@ -132,7 +136,7 @@ async function main() {
         password: actPassword,
         actors: demoActors(domain),
       })
-      console.warn(`Issuance enabled against ${pdsUrl}`)
+      console.log(`Issuance enabled against ${pdsUrl}`)
     } else {
       console.warn('Issuance disabled: needs PDS_INTERNAL_URL and SEED_ACCOUNT_PASSWORD.')
     }
@@ -158,7 +162,7 @@ async function main() {
         }),
       )
     : null
-  console.warn(
+  console.log(
     narrator
       ? 'Form prose is narrated by Claude Sonnet; failures fall back to the catalogue.'
       : 'No ANTHROPIC_API_KEY: generated forms come from the built-in catalogue.',
@@ -178,8 +182,16 @@ async function main() {
           onError: (err) => console.warn('activity generator:', describe(err)),
         })
       : null
-  if (wantActivity && !writer) {
+  // Said here rather than in describeConfig, which is handed a config and not
+  // the two things this depends on: the variable, and whether there is a write
+  // path at all. It used to announce a running generator to a reader who had
+  // just set F8130_ACTIVITY=0.
+  if (activity) {
+    console.log('Synthetic activity runs while the feed is being watched. F8130_ACTIVITY=0 disables it.')
+  } else if (wantActivity) {
     console.warn('Synthetic activity disabled: no write path is configured.')
+  } else if (process.env.F8130_ACTIVITY === '0') {
+    console.log('Synthetic activity is off: F8130_ACTIVITY=0.')
   }
 
   const app = createApp({

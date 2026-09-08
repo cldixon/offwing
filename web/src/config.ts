@@ -75,7 +75,11 @@ export function describeConfig(c: Config): string[] {
   }
   if (c.mode === 'demo') {
     lines.push('Browsing is served from an in-memory index, and dies with the process.')
-    lines.push('Synthetic activity runs while the feed is being watched. F8130_ACTIVITY=0 disables it.')
   }
+  // Nothing about synthetic activity is said here. Whether the generator runs
+  // depends on a variable and on whether there is a write path at all, neither
+  // of which this function is given — so the line it used to print announced
+  // a generator that was running to a reader who had just switched it off.
+  // The process says what it did where it decides, in index.ts.
   return lines
 }
