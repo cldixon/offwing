@@ -642,10 +642,12 @@ main { padding: var(--s-5) 0 5rem; min-width: 0; }
   font: var(--w-bold) var(--fs-34)/var(--lh-tight) var(--font-display);
   text-transform: uppercase; letter-spacing: var(--track-display);
 }
+/* The tagline is sized to sit on one line inside the rail: thirty-four mono
+   characters against a fifteen-rem column leaves no room for tracking. */
 .rail .brand span {
   display: block; margin-top: var(--s-2);
-  font: var(--w-regular) var(--fs-12)/1.4 var(--font-mono); color: var(--muted);
-  letter-spacing: var(--track-label); text-transform: uppercase;
+  font: var(--w-regular) var(--fs-10)/1.4 var(--font-mono); color: var(--muted);
+  letter-spacing: var(--track-display); text-transform: uppercase; white-space: nowrap;
 }
 .rail nav { display: flex; flex-direction: column; gap: var(--nav-gap); }
 /* The active item is marked by a rule down its left edge rather than a fill.
