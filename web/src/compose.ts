@@ -71,7 +71,8 @@ export function composer() {
   return html`<dialog id="composer">
     <div class="chead">
       <strong>New release certificate</strong>
-      <form method="dialog"><button class="ghost" aria-label="Close">&times;</button></form>
+      <span class="chip">Draft</span>
+      <form method="dialog"><button class="ghost close" aria-label="Close">&times;</button></form>
     </div>
     <div class="cbody">
       <div class="working">
