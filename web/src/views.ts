@@ -1802,13 +1802,6 @@ export function feedPage(params: {
           </div></div>`
         : ''}
 
-    ${me
-      ? html`<a href="/issue" class="compose-row" data-compose>
-          ${avatar(me.displayName, true)} Release a part
-          <span class="plus">${icon('plus')}</span>
-        </a>`
-      : ''}
-
     <div id="feed" class="feed">
       ${params.events.map((e) =>
         feedCard(

@@ -650,7 +650,7 @@ export function createApp(deps: AppDeps) {
   // is. The rail's info button opens the same prose in a dialog and falls back
   // to this page with scripting off.
 
-  app.get('/about', (c) => c.html(aboutPage(mode, chrome(c))))
+  app.get('/about', (c) => c.html(aboutPage(mode, chrome(c, 'about'))))
 
   // --------------------------------------------------------------- verify
 

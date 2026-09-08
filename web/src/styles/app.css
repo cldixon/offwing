@@ -651,33 +651,45 @@ main { padding: var(--s-5) 0 5rem; min-width: 0; }
   font: var(--w-bold) var(--fs-34)/var(--lh-tight) var(--font-display);
   text-transform: uppercase; letter-spacing: var(--track-display);
 }
-/* The tagline is sized to sit on one line inside the rail: thirty-four mono
-   characters against a fifteen-rem column leaves no room for tracking. */
+/* The tagline is the only line on any screen that says what the site is, so
+   it is set to be read rather than to be noticed: the secondary ink and the
+   bold weight, not the tertiary ink at regular. Space Mono is monospaced, so
+   bold costs no width. Its size holds it on one line inside the rail —
+   thirty-four mono characters against a fifteen-rem column leave no room for
+   more. */
 .rail .tagline {
   margin: var(--s-2) 0 0;
-  font: var(--w-regular) var(--fs-10)/1.4 var(--font-mono); color: var(--muted);
+  font: var(--w-bold) var(--fs-10)/1.4 var(--font-mono); color: var(--sub);
   letter-spacing: var(--track-display); text-transform: uppercase; white-space: nowrap;
 }
-/* The two chrome controls: what this is, and which theme to paint it in.
-   Icon-sized and quiet, because neither is a destination. */
-.tools { display: flex; align-items: center; gap: var(--s-1); margin-top: var(--s-2); }
-.tool {
-  display: grid; place-items: center; width: 1.75rem; height: 1.75rem; padding: 0;
-  border: 0; border-radius: var(--r-inner); background: none; color: var(--muted);
-  cursor: pointer;
+
+/* The theme switch, at the foot of the rail under identity: a preference
+   about this reader rather than a page, so it sits with the other one. Drawn
+   as a quieter nav item — the same row, the same icon box, no active rule. */
+.themeswitch {
+  display: flex; align-items: center; gap: var(--s-3); width: 100%;
+  margin: 0; padding: var(--nav-pad); border: 0; border-radius: 0;
+  /* The same transparent rule every nav item carries, so its icon sits on
+     the same vertical as theirs rather than three pixels to the left. */
+  border-left: var(--bw-rule) solid transparent;
+  background: none; color: var(--muted);
+  font: var(--w-medium) var(--fs-14)/var(--lh-body) var(--font-body);
+  text-transform: none; letter-spacing: normal; text-align: left; cursor: pointer;
 }
-.tool:hover { background: var(--skip-bg); color: var(--fg); }
-.tool .ico-svg { width: 1.05rem; height: 1.05rem; }
-/* The toggle shows the theme it would switch to, which is the opposite of the
-   one being painted. With no stored choice there is no attribute, so the
-   system preference decides — the same question tokens.css asks. */
-.tool .t-sun { display: none; }
-.tool .t-moon { display: block; }
-:root[data-theme="dark"] .tool .t-sun { display: block; }
-:root[data-theme="dark"] .tool .t-moon { display: none; }
+.themeswitch:hover { filter: none; }
+.themeswitch:hover { background: var(--skip-bg); color: var(--fg); }
+.themeswitch > span { display: flex; align-items: center; gap: var(--s-3); }
+.themeswitch .ico-svg { width: 1.05rem; height: 1.05rem; }
+/* It shows the theme it would switch to, which is the one not being painted.
+   With no stored choice there is no attribute, so the system preference
+   decides — the same question tokens.css asks. */
+.themeswitch .t-sun { display: none; }
+.themeswitch .t-moon { display: flex; }
+:root[data-theme="dark"] .themeswitch .t-sun { display: flex; }
+:root[data-theme="dark"] .themeswitch .t-moon { display: none; }
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme]) .tool .t-sun { display: block; }
-  :root:not([data-theme]) .tool .t-moon { display: none; }
+  :root:not([data-theme]) .themeswitch .t-sun { display: flex; }
+  :root:not([data-theme]) .themeswitch .t-moon { display: none; }
 }
 .rail nav { display: flex; flex-direction: column; gap: var(--nav-gap); }
 /* The active item is marked by a rule down its left edge rather than a fill.
@@ -707,8 +719,12 @@ main { padding: var(--s-5) 0 5rem; min-width: 0; }
 
 /* Identity under the rail rather than pinned to the foot of it. Pinning
    wants a full-height rail, and a full-height rail under a banner of unknown
-   height overflows the viewport by exactly the banner. */
-.me { border-top: var(--bw) solid var(--line); padding-top: var(--s-5); }
+   height overflows the viewport by exactly the banner.
+
+   It shares a rule with the theme switch, the two being what this reader has
+   chosen rather than anywhere they can go. */
+.railfoot { border-top: var(--bw) solid var(--line); padding-top: var(--s-4); }
+.railfoot .themeswitch { margin-top: var(--s-2); }
 .me > summary {
   list-style: none; cursor: pointer; padding: var(--s-2) var(--s-3); border-radius: var(--r-inner);
   display: flex; align-items: center; gap: var(--s-3);
@@ -1037,36 +1053,6 @@ dialog#about .cbody p { margin: 0 0 var(--s-2); }
   border: var(--bw) solid var(--line); border-radius: var(--r-inner); padding: .15rem var(--s-2);
 }
 
-/*
- * The compose row at the top of the feed.
- *
- * It used to be a pale card with a placeholder in it — the text box a social
- * client puts there — and on a page made of pale cards it read as the first
- * item in the feed rather than as the one thing on the screen you can do. It
- * is now shaped like what it is: the CTA's fill, the display face the rail's
- * button uses, and a plus in a box at the front. The avatar stays, because it
- * is also the answer to "who would this be signed by".
- */
-.compose-row {
-  display: flex; align-items: center; gap: var(--s-3); width: 100%;
-  background: var(--card); border: var(--bw-tab) solid var(--accent-rule);
-  border-radius: var(--r-card);
-  padding: var(--s-3) .875rem; margin-bottom: var(--feed-gap); cursor: pointer;
-  color: var(--accent-ink); text-decoration: none;
-  font: var(--w-bold) var(--fs-18)/var(--lh-tight) var(--font-display);
-  text-transform: uppercase; letter-spacing: var(--track-cta);
-}
-.compose-row:hover { background: var(--accent-wash); }
-/* The plus takes the accent as a fill, so the row ends in the same mark the
-   phone's floating button carries and the whole thing reads as one control
-   rather than as the first card in the feed. */
-.compose-row .plus {
-  display: grid; place-items: center; width: 1.75rem; height: 1.75rem; flex: 0 0 auto;
-  margin-left: auto; border-radius: var(--r-inner);
-  background: var(--accent); color: var(--accent-fg);
-}
-.compose-row .plus .ico-svg { width: 1.15rem; height: 1.15rem; }
-
 /* Desktop shows the long label; the tab bar's short one stays out of the way. */
 .rail nav a .tab, .rail .newpost .tab { display: none; }
 
@@ -1106,14 +1092,20 @@ dialog#about .cbody p { margin: 0 0 var(--s-2); }
   .rail .mark { display: contents; }
   .rail .brand { grid-area: 1 / 1; }
   .brand { font-size: var(--fs-26); }
-  /* Both take the whole second row and the tools sit on top of its right
+  /* Both take the whole second row and the switch sits on top of its right
      end, rather than the tagline taking the column the account control's
      width decides — that column is what is left after a long organisation
      name, which is not enough for a line of text. */
   .rail .tagline {
-    grid-area: 2 / 1 / 3 / -1; white-space: normal; padding-right: 4.25rem;
+    grid-area: 2 / 1 / 3 / -1; white-space: normal; padding-right: 2.5rem;
+    font-size: var(--fs-11);
   }
-  .rail .tools { grid-area: 2 / 1 / 3 / -1; margin: 0; justify-self: end; }
+  /* Icon only up here: the label belongs to a rail that has room for it. */
+  .themeswitch {
+    grid-area: 2 / 1 / 3 / -1; justify-self: end; width: auto; margin: 0;
+    padding: var(--s-1); border-left: 0; border-radius: var(--r-inner);
+  }
+  .themeswitch .label { display: none; }
 
   /* And the links become a tab bar pinned to the bottom of the viewport. The
      active item's rule moves from its left edge to its top edge. */
@@ -1156,8 +1148,10 @@ dialog#about .cbody p { margin: 0 0 var(--s-2); }
   .rail .newpost .tab .ico-svg { width: 1.6rem; height: 1.6rem; }
   .rail .newpost.off { box-shadow: none; }
 
-  /* Identity sits at the top right, and its menu drops from there. */
-  .me { grid-area: 1 / 2; position: relative; border-top: 0; padding-top: 0; justify-self: end; }
+  /* Identity sits at the top right, and its menu drops from there; the
+     switch drops to the second row beside the tagline. */
+  .railfoot { display: contents; }
+  .me { grid-area: 1 / 2; position: relative; justify-self: end; }
   .me > summary { padding: var(--s-1) .3rem; }
   .me .av { width: var(--av-md); height: var(--av-md); font-size: var(--fs-11); }
   .me .who b { max-width: 8.5rem; }
@@ -1187,6 +1181,14 @@ dialog#about .cbody p { margin: 0 0 var(--s-2); }
 
   /* Clear the tab bar and the floating button. */
   main { padding-bottom: 7rem; }
+}
+
+/* Narrower than any phone this was drawn for, or any width at all when the
+   condensed face never arrives: the brand and the account control are both as
+   wide as their own text, and past this point they meet. The control keeps
+   its avatar and drops its name, which the menu still carries. */
+@media (max-width: 22rem) {
+  .me .who { display: none; }
 }
 
 /* The 8130-3 has four columns of blocks because the paper does. On a phone

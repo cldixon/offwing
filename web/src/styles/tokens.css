@@ -24,6 +24,7 @@
  *   60rem  the rail becomes a top bar and the navigation a bottom tab bar
  *   40rem  side-by-side comparisons stack
  *   34rem  two-column lists and label/value rows stack
+ *   22rem  the account control keeps its avatar and drops its name
  */
 
 :root {

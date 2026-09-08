@@ -1799,16 +1799,18 @@ describe('the chrome tells a first-time visitor what this is', () => {
     )
   })
 
-  test('the info button opens a box and degrades to a page', async () => {
+  test('what this is has a page, and the navigation leads to it', async () => {
     const { app } = await feedApp()
 
+    // A navigation entry rather than an icon between the tagline and the
+    // links, which is a place nobody looks. Two labels like every other
+    // entry, because a rail and a tab bar want different words.
     const body = await (await app.request('/')).text()
-    // A link to a real page, upgraded by script rather than replaced by it.
-    assert.match(body, /<a class="tool" href="\/about" data-about/)
-    assert.match(body, /<dialog id="about">/)
+    assert.match(
+      body,
+      /<a href="\/about" class=""><span class="ico"><svg[^>]*>.*?<\/svg><\/span>\s*<span class="full">What this is<\/span><span class="tab">About<\/span><\/a>/s,
+    )
 
-    // And the page it degrades to says the same thing, because both render
-    // the same prose.
     const page = await app.request('/about')
     assert.equal(page.status, 200)
     const about = await page.text()
@@ -1819,8 +1821,29 @@ describe('the chrome tells a first-time visitor what this is', () => {
       'not an airworthiness system',
     ]) {
       assert.ok(about.includes(claim), `/about is missing: ${claim}`)
-      assert.ok(body.includes(claim), `the dialog is missing: ${claim}`)
     }
+    // And it lights its own entry while you are on it.
+    assert.match(about, /<a href="\/about" class="on">/)
+  })
+
+  test('the primary action is offered once', async () => {
+    const { net } = await demoNetwork(DOMAIN)
+    const index = new MemoryIndex()
+    const writer = new MemoryRecordWriter(net, index, demoActors(DOMAIN))
+    const app = createApp({ resolver: net, repo: net, index, writer, mode: 'live' })
+    const body = await (await app.request('/')).text()
+
+    // The feed used to open with a compose row as well, which is the rail's
+    // own button restated two inches away — and on a phone, restated a third
+    // time by the floating one. One control, one place.
+    // The script's own '[data-compose]' selector is a mention of the
+    // attribute rather than a second control, so it is not counted.
+    assert.equal(
+      (body.match(/data-compose(?!\])/g) ?? []).length,
+      1,
+      'the way in is offered more than once',
+    )
+    assert.ok(!body.includes('compose-row'), 'the compose row is back')
   })
 
   test('the theme toggle is a control that works before it is offered', async () => {
@@ -1829,7 +1852,7 @@ describe('the chrome tells a first-time visitor what this is', () => {
 
     // Shipped hidden: a toggle with scripting off would do nothing at all,
     // and those readers keep the system-following behaviour they had.
-    assert.match(body, /<button type="button" class="tool" id="theme" hidden/)
+    assert.match(body, /<button type="button" class="themeswitch" id="theme" hidden/)
     assert.match(body, /localStorage\.setItem\('offwing\.theme'/)
 
     // Applied in the head, before the first paint, or a reader who chose dark

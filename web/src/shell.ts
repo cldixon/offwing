@@ -78,7 +78,7 @@ const FAVICON =
 export type Mode = 'demo' | 'live'
 
 /** Which rail entry is lit. */
-export type NavKey = 'home' | 'inbox' | 'issuers' | 'profile' | null
+export type NavKey = 'home' | 'inbox' | 'issuers' | 'profile' | 'about' | null
 
 /**
  * The one piece of per-request state every page shares: who the visitor is
@@ -182,8 +182,15 @@ const ICONS: Record<string, string> = {
      the tab bar and the least legible. Lucide paths sit on the same 24-unit
      box and 2-unit stroke as every other icon here, so the bar is drawn in
      one hand. */
-  // rss: what is being published
-  feed: '<path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1"/>',
+  // radio-tower: what is being published. The rss mark reads as a wifi
+  // symbol, which is a connection rather than a broadcast.
+  feed:
+    '<path d="M4.9 16.1C1 12.2 1 5.8 4.9 1.9"/>' +
+    '<path d="M7.8 4.7a6.14 6.14 0 0 0-.8 7.5"/>' +
+    '<circle cx="12" cy="9" r="2"/>' +
+    '<path d="M16.2 4.8c2 2 2.26 5.11.8 7.47"/>' +
+    '<path d="M19.1 1.9a9.96 9.96 0 0 1 0 14.1"/>' +
+    '<path d="M9.5 18h5"/><path d="m8 22 4-11 4 11"/>',
   // inbox: what is waiting on me
   inbox:
     '<polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/>' +
@@ -222,9 +229,9 @@ export function icon(name: string) {
 /**
  * What this is, in four paragraphs.
  *
- * One function because it is rendered twice: into the dialog the info button
- * opens, and into the /about page that button falls back to with scripting
- * off. A visitor who arrives on the feed with no idea what a release
+ * Here rather than in views.ts because the navigation entry that leads to it
+ * is in this file, and because it is the shell's answer to a question the
+ * shell raises: a visitor who arrives on the feed with no idea what a release
  * certificate is has nothing else to read — the rail's tagline names the
  * subject and does not explain the problem.
  */
@@ -546,36 +553,6 @@ const THEME_SCRIPT = `
 })()
 `
 
-/**
- * The info button, upgraded from a link to a dialog.
- *
- * The same arrangement as the composer: the markup is a link to a page that
- * really exists and really renders this prose, and script turns it into a box
- * that opens over whatever you were reading. Nothing here writes the copy —
- * `aboutProse` is rendered into the dialog server-side and into /about — so
- * the two cannot say different things.
- */
-const ABOUT_SCRIPT = `
-(function () {
-  var dlg = document.getElementById('about')
-  if (!dlg || !dlg.showModal) return
-  document.querySelectorAll('[data-about]').forEach(function (el) {
-    el.addEventListener('click', function (e) { e.preventDefault(); dlg.showModal() })
-  })
-})()
-`
-
-/** The about box, which every page carries and the info button opens. */
-function aboutDialog() {
-  return html`<dialog id="about">
-    <div class="chead">
-      <strong>What this is</strong>
-      <form method="dialog"><button class="ghost close" aria-label="Close">&times;</button></form>
-    </div>
-    <div class="cbody">${aboutProse()}</div>
-  </dialog>`
-}
-
 export function layout(
   title: string,
   body: HtmlEscapedString | Promise<HtmlEscapedString>,
@@ -611,26 +588,13 @@ ${raw(`<script>${THEME_BOOT_SCRIPT}</script>`)}
 </div>
 <div class="app">
   <aside class="rail">
-    <!-- The brand, what the site is, and the two chrome controls. One block,
-         because on a phone the rail is a top bar and these have to lay
-         themselves out as a grid; .mark is display:contents there so its
-         children become the grid's own items. -->
+    <!-- The brand and what the site is. One block, because on a phone the
+         rail is a top bar and these have to lay themselves out as a grid;
+         .mark is display:contents there so its children become the grid's
+         own items. -->
     <div class="mark">
       <a class="brand" href="/">OffWing</a>
       <p class="tagline">${TAGLINE}</p>
-      <div class="tools">
-        <!-- A link rather than a button, and to a real page: with scripting
-             off it navigates to /about, which renders the same prose. -->
-        <a class="tool" href="/about" data-about title="What this is"
-          aria-label="What this is">${icon('info')}</a>
-        <!-- Hidden until the script that makes it work has run. A control
-             that does nothing is worse than one that is not there. -->
-        <button type="button" class="tool" id="theme" hidden
-          title="Switch between light and dark"
-          aria-label="Switch between light and dark"
-          ><span class="t-moon">${icon('moon')}</span
-          ><span class="t-sun">${icon('sun')}</span></button>
-      </div>
     </div>
     <!-- Each entry answers a different question. Feed: what is happening.
          Receiving: what is waiting on me. Issuers: who is publishing, and how
@@ -668,6 +632,12 @@ ${raw(`<script>${THEME_BOOT_SCRIPT}</script>`)}
             class="${on('profile')}"><span class="ico">${icon('factory')}</span>
             <span class="full">Profile</span><span class="tab">Profile</span></a>`
         : ''}
+      <!-- Last, and a destination rather than a dialog. It was an icon
+           floating between the tagline and the navigation, which is a place
+           nobody looks; the one screen that says what any of this is for
+           should be somewhere a visitor is already reading. -->
+      <a href="/about" class="${on('about')}"><span class="ico">${icon('info')}</span>
+        <span class="full">What this is</span><span class="tab">About</span></a>
     </nav>
     ${actors.length > 0
       ? me
@@ -678,16 +648,32 @@ ${raw(`<script>${THEME_BOOT_SCRIPT}</script>`)}
             ><span class="full">Create release</span
             ><span class="tab">${icon('plus')}</span></span>`
       : ''}
-    ${actors.length > 0 ? identity(chrome!) : ''}
+    <!-- The foot of the rail: the two things that are about this reader
+         rather than about the network — who they are acting as, and which
+         theme to paint it in — under one rule, away from the pages. On a
+         phone this is display:contents so both become items of the top bar's
+         grid.
+
+         The switch is hidden until the script that makes it work has run: a
+         control that does nothing is worse than one that is not there. Both
+         faces are in the markup and the stylesheet shows the one that is not
+         currently painted, which is the theme it would switch to. -->
+    <div class="railfoot">
+      ${actors.length > 0 ? identity(chrome!) : ''}
+      <button type="button" class="themeswitch" id="theme" hidden
+        title="Switch between light and dark"
+        aria-label="Switch between light and dark"
+        ><span class="t-moon">${icon('moon')}<span class="label">Dark</span></span
+        ><span class="t-sun">${icon('sun')}<span class="label">Light</span></span
+      ></button>
+    </div>
   </aside>
   <main>
     ${body}
   </main>
 </div>
-${aboutDialog()}
 ${withComposer ? composer() : ''}
 ${withComposer ? html`${raw(`<script>${COMPOSER_SCRIPT}</script>`)}` : ''}
-${raw(`<script>${ABOUT_SCRIPT}</script>`)}
 ${raw(`<script>${THEME_SCRIPT}</script>`)}
 ${raw(`<script>${BUNDLES_SCRIPT}</script>`)}
 ${actors.length > 0 ? html`${raw(`<script>${SWITCHER_SCRIPT}</script>`)}` : ''}
