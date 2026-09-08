@@ -173,6 +173,18 @@ describe('the account header', () => {
    * joined it, and there is no membership to date from — so the claim is the
    * one this observer can support, and it is worded as an observation.
    */
+  /**
+   * The window names the kind of page, the way Feed and Issuers and Receiving
+   * do. The organization's name is the first thing on the page itself.
+   */
+  test('the tab says Profile rather than whose profile it is', async () => {
+    const { app } = await accountApp(shopProfile)
+    const body = await (await app.request(`/profile/cascadia-mro.${DOMAIN}`)).text()
+
+    assert.match(body, /<title>Profile - Offwing<\/title>/)
+    assert.match(body, /<h1>Cascadia MRO<\/h1>/, 'the name left the page as well')
+  })
+
   test('tenure is stated as observation, not as membership', async () => {
     const { app } = await accountApp((i) => {
       i.setHandle(MRO, `cascadia-mro.${DOMAIN}`)

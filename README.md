@@ -1,4 +1,4 @@
-# OffWing — verifiable release certificates on AT Protocol
+# Offwing — verifiable release certificates on AT Protocol
 
 > ## ⚠️ ALL DATA IN THIS REPOSITORY IS SYNTHETIC
 >

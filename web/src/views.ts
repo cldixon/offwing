@@ -105,8 +105,9 @@ function stageRow(s: Stage) {
  */
 export function aboutPage(mode: Mode = 'live', chrome?: Chrome) {
   return layout(
-    'What this is',
-    html`<h1>What this is</h1>
+    // The same words the navigation uses, as every other page here does.
+    'More info',
+    html`<h1>More info</h1>
       <p class="sub">
         A demonstration of verifiable release certificates, and the problem
         they exist to address.
@@ -453,11 +454,12 @@ export function dashboardPage(params: {
     'Issuers',
     html`<h1>Issuers</h1>
     <p class="sub">
-      Every organization this observer has seen publish, verified against the
-      issuer&rsquo;s own signing key.
+      Every organization who has published a certificate to the network.
     </p>
 
-    <h2>Who is publishing</h2>
+    <!-- No section heading above the table. There is one table on the page
+         and the title already named it; a heading between them only said the
+         same thing a third time. -->
     <div class="card scroll">
       ${params.issuers.length === 0
         ? html`<div class="empty">No issuers observed yet.</div>`
@@ -1062,7 +1064,10 @@ export function accountPage(params: {
     html`<div title="${what}"><dt>${label}</dt><dd class="mono">${value}</dd></div>`
 
   return layout(
-    name,
+    // The tab says what kind of page this is, the way every other one does —
+    // Feed, Issuers, Receiving. The organization's name is the first thing on
+    // the page itself and does not need to be the window's name too.
+    'Profile',
     html`<section class="account">
       <div class="who">
         ${avatar(name)}
@@ -1242,10 +1247,8 @@ export function inboxPage(params: {
       </div>`
     : html`<h1>Receiving</h1>
       <p class="sub">
-        Parts delivered to ${params.actor.displayName}, with the 8130 paperwork
-        that arrived in the crate. Check the document against the record issued
-        by the sending station. You have the option to publicly attest that the
-        record is valid.
+        Incoming packages delivered to your organization. Verify the 8130 paper
+        copy matches the record published to the network by the issuer.
       </p>
 
       ${params.arrivals.length === 0

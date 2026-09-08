@@ -1,5 +1,5 @@
 /*
- * OffWing component styles.
+ * Offwing component styles.
  *
  * Everything here is written in terms of the tokens in tokens.css and nothing
  * else: no literal colours, typefaces, sizes or radii. If a value you need is
@@ -1045,7 +1045,7 @@ dialog#about .cbody p { margin: 0 0 var(--s-2); }
   /*
    * The rail becomes a top bar of two rows:
    *
-   *   OffWing                      [identity]
+   *   Offwing                      [identity]
    *   FAA 8130-3 CERTIFICATES…     [info] [theme]
    *
    * The tagline used to be hidden here, which left a phone visitor with a

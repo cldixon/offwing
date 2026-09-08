@@ -1867,9 +1867,65 @@ describe('the chrome tells a first-time visitor what this is', () => {
     const { app } = await feedApp()
     const body = await (await app.request('/')).text()
 
-    assert.match(body, /<title>Feed - OffWing<\/title>/)
+    assert.match(body, /<title>Feed - Offwing<\/title>/)
     assert.match(body, /<link rel="icon" href="data:image\/svg\+xml,/)
     assert.match(body, /<meta name="description" content="FAA 8130-3 certificates on atproto">/)
+  })
+
+  /**
+   * The name is Offwing. It was OffWing, and a product whose own tab spells it
+   * two ways has two names.
+   */
+  test('every tab names the page and then the product, spelled one way', async () => {
+    const { app } = await feedApp()
+    const expected: Record<string, string> = {
+      '/': 'Feed',
+      '/parts': 'Issuers',
+      '/verify': 'Verify',
+      '/about': 'More info',
+    }
+    for (const [path, page] of Object.entries(expected)) {
+      const body = await (await app.request(path)).text()
+      assert.match(
+        body,
+        new RegExp(`<title>${page} - Offwing</title>`),
+        `${path} does not title itself "${page} - Offwing"`,
+      )
+      assert.ok(!body.includes('OffWing'), `${path} still spells it OffWing`)
+    }
+  })
+})
+
+describe('what a page says it is for', () => {
+  test('the issuers page names the table once', async () => {
+    const { app } = await feedApp((i) => i.addRelease(release()))
+    const body = await (await app.request('/parts')).text()
+
+    assert.match(
+      body,
+      /Every organization who has published a certificate to the network\./,
+    )
+    // The page has one table and the title already named it.
+    assert.ok(!body.includes('Who is publishing'), 'the third naming is back')
+  })
+
+  test('receiving says what arrived and what to do with it', async () => {
+    const { net } = await demoNetwork(DOMAIN)
+    const index = new MemoryIndex()
+    const writer = new MemoryRecordWriter(net, index, demoActors(DOMAIN))
+    const app = createApp({
+      resolver: net, repo: net, index, writer, dock: new Dock(), mode: 'live',
+    })
+    const body = await (
+      await app.request('/inbox', {
+        headers: { cookie: `f8130_actor=example-air.${DOMAIN}` },
+      })
+    ).text()
+
+    assert.match(
+      body,
+      /Incoming packages delivered to your organization\. Verify the 8130 paper\s+copy matches the record published to the network by the issuer\./,
+    )
   })
 })
 

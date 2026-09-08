@@ -511,7 +511,7 @@ export function layout(
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>${title} - OffWing</title>
+<title>${title} - Offwing</title>
 <meta name="description" content="${TAGLINE}">
 <link rel="icon" href="${FAVICON}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -534,7 +534,7 @@ export function layout(
          .mark is display:contents there so its children become the grid's
          own items. -->
     <div class="mark">
-      <a class="brand" href="/">OffWing</a>
+      <a class="brand" href="/">Offwing</a>
       <p class="tagline">${TAGLINE}</p>
     </div>
     <!-- Each entry answers a different question. Feed: what is happening.
