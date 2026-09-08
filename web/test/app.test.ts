@@ -456,6 +456,20 @@ describe('zero-configuration deployment', () => {
     assert.equal(c.modeInferred, false)
   })
 
+  /**
+   * Whether the generator runs depends on a variable and on whether there is a
+   * write path at all, and this function is handed neither — so it used to
+   * announce a running generator to a reader who had just set
+   * F8130_ACTIVITY=0. The process says what it did where it decides.
+   */
+  test('the description does not claim a generator it cannot know about', async () => {
+    const { loadConfig, describeConfig } = await import('../src/config.js')
+    const said = describeConfig(loadConfig({} as NodeJS.ProcessEnv)).join('\n')
+
+    assert.match(said, /DEMO MODE/)
+    assert.ok(!said.includes('F8130_ACTIVITY'), 'it is speaking for the generator again')
+  })
+
   test('a demo instance says so on every page', async () => {
     const { net } = await standardNetwork()
     const { createApp } = await import('../src/app.js')
