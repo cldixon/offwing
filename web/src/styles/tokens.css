@@ -12,13 +12,11 @@
  * monospace for every identifier. The product should read as aviation and
  * MRO infrastructure rather than as a generic social client.
  *
- * Both themes are specified, as light-dark() pairs so each colour is declared
- * once with both its values side by side rather than as a light block and a
- * dark block that drift apart. Which half is used follows `color-scheme`,
- * which follows the reader's system preference until the theme toggle in the
- * rail overrides it — that control sets one attribute on <html> and the two
- * rules at the foot of this file do the rest. Only the palette changes between
- * the themes; type, shape and spacing are the same in both.
+ * One palette, and it is dark. A light theme existed, and was the default; it
+ * was never what this product looked right in. An instrument panel is dark
+ * because the reading matters more than the surface it is on, and that is what
+ * this screen is. Keeping a second theme nobody chose meant every colour
+ * carrying a value it was never seen in, and every new colour needing two.
  *
  * Breakpoints cannot be custom properties, so for the record they are:
  *   60rem  the rail becomes a top bar and the navigation a bottom tab bar
@@ -28,53 +26,47 @@
  */
 
 :root {
-  /* Both halves are available; which one is used follows the reader's system
-     preference, or the theme toggle's attribute when they have chosen. */
-  color-scheme: light dark;
+  color-scheme: dark;
 
   /* ----------------------------------------------------------------- palette
-     Each colour is one light-dark(light, dark) pair, so the two themes cannot
-     drift: there is no second block to forget to edit.
+     Softened black fields, warm off-white ink, one safety yellow. The yellow
+     does three jobs and takes the same value in all three here: a surface (the
+     primary button, the badge, the YOU chip), text (--accent-ink) and a line
+     (--accent-rule). They stay three names because they are three jobs — on a
+     pale field the last two would have to darken, which is exactly the split
+     that made them separate names in the first place. */
+  --bg: #202226;          /* page field */
+  --card: #292b30;        /* cards, panels, rail menus */
+  --nest: #22242a;        /* a record quoted in another */
+  --line: #383b41;        /* every 1px border and rule */
+  --fg: #eeede8;          /* primary text */
+  --sub: #b4b5b0;         /* byline verbs, descriptions */
+  --muted: #8d8f8b;       /* timestamps, labels, captions */
 
-     The rule for yellow on light: #f2c318 is a *surface* colour only (the
-     primary button, the badge, the YOU chip). Yellow as text uses
-     --accent-ink and yellow as a line uses --accent-rule, both darkened so
-     they hold contrast against the off-white field. On dark all three are
-     the same yellow. */
-  --bg: light-dark(#ebeae5, #202226);          /* page field */
-  --card: light-dark(#f7f6f2, #292b30);        /* cards, panels, rail menus */
-  --nest: light-dark(#ebeae5, #22242a);        /* a record quoted in another */
-  --line: light-dark(#d5d3cc, #383b41);        /* every 1px border and rule */
-  --fg: light-dark(#1d1f23, #eeede8);          /* primary text */
-  --sub: light-dark(#55575c, #b4b5b0);         /* byline verbs, descriptions */
-  --muted: light-dark(#7c7e82, #8d8f8b);       /* timestamps, labels, captions */
+  --accent: #f2c318;      /* yellow as a surface */
+  --accent-ink: #f2c318;  /* yellow as text */
+  --accent-rule: #f2c318; /* yellow as a line */
+  --accent-fg: #202226;   /* ink on an accent surface */
+  --cta-bg: #f2c318;      /* primary button — inverts */
+  --cta-fg: #202226;
 
-  --accent: light-dark(#f2c318, #f2c318);      /* yellow as a surface */
-  --accent-ink: light-dark(#a07a00, #f2c318);  /* yellow as text */
-  --accent-rule: light-dark(#e6b400, #f2c318); /* yellow as a line */
-  --accent-fg: light-dark(#1d1f23, #202226);   /* ink on an accent surface */
-  --cta-bg: light-dark(#1d1f23, #f2c318);      /* primary button — inverts */
-  --cta-fg: light-dark(#f2c318, #202226);
+  --pass: #6fd39a;
+  --fail: #f0786a;
+  --warn: #e6b84a;
+  --skip: #8d8f8b;
+  --pass-bg: #1c3326;
+  --fail-bg: #3a201c;
+  --warn-bg: #33290f;
+  --skip-bg: #2f3136;     /* also the neutral hover wash */
 
-  --pass: light-dark(#1e7a4a, #6fd39a);
-  --fail: light-dark(#b3261e, #f0786a);
-  --warn: light-dark(#8a6100, #e6b84a);
-  --skip: light-dark(#7c7e82, #8d8f8b);
-  --pass-bg: light-dark(#e0efe4, #1c3326);
-  --fail-bg: light-dark(#f8e3e0, #3a201c);
-  --warn-bg: light-dark(#f7efd2, #33290f);
-  --skip-bg: light-dark(#e2e0da, #2f3136);     /* also the neutral hover wash */
+  /* The standing admonition's own bar: the card's value, so the notice the
+     whole page is qualified by reads as the frame around the demonstration
+     rather than as the first card in it. */
+  --marker-bg: #292b30;
+  --marker-ink: #b4b5b0;
+  --marker-strong: #eeede8;
 
-  /* The standing admonition's own bar. It is the one strip of chrome that is
-     dark in both themes: on light it was a pale band between a pale banner
-     and a pale page, and read as another card rather than as the notice the
-     whole page is qualified by. Dark, it is unmistakably the frame around the
-     demonstration rather than part of it. */
-  --marker-bg: light-dark(#1d1f23, #292b30);
-  --marker-ink: light-dark(#b9b8b2, #b4b5b0);
-  --marker-strong: light-dark(#f7f6f2, #eeede8);
-
-  --backdrop: light-dark(rgba(20, 20, 22, .5), rgba(0, 0, 0, .55));
+  --backdrop: rgba(0, 0, 0, .55);
   --on-color: #ffffff;      /* text on a saturated avatar or status colour */
 
   /* Derived washes: a hint of a colour over whatever is underneath, for a
@@ -185,15 +177,3 @@
   --focus-w: 2px;
   --focus-offset: 2px;
 }
-
-/*
- * The theme toggle, which is these two rules and nothing else.
- *
- * With no attribute the page follows the system, because `color-scheme` above
- * names both schemes and the browser picks. The control in the rail stamps
- * data-theme on <html>, which narrows that to one and every light-dark() pair
- * above resolves the other way. No palette is repeated to make it happen, and
- * a visitor with scripting off keeps the system-following behaviour they had.
- */
-:root[data-theme="light"] { color-scheme: light; }
-:root[data-theme="dark"] { color-scheme: dark; }

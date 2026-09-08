@@ -234,7 +234,7 @@ The interface has one design system and every screen is drawn from it:
 
 | | |
 |---|---|
-| `web/src/styles/tokens.css` | the vocabulary — palette for light and dark, type scale, radii, spacing, shadows, motion |
+| `web/src/styles/tokens.css` | the vocabulary — palette, type scale, radii, spacing, shadows, motion |
 | `web/src/styles/app.css` | the components, written only in terms of those tokens |
 
 Neither the templates nor `app.css` carry a colour, typeface, size or radius of
@@ -244,14 +244,12 @@ request and there is no build step. The fonts — Barlow Condensed for display,
 Barlow for text, Space Mono for every identifier — are the one thing fetched
 from elsewhere, and each has a system fallback.
 
-Every colour is one `light-dark(light, dark)` pair rather than a light block
-and a dark block that drift apart, so which theme is painted is decided by
-`color-scheme` alone. That makes the toggle in the rail a single attribute on
-`<html>`: with none set the page follows the reader's system, including when
-their system changes while the page is open, and a stored choice is applied in
-the head before the first paint so nobody who chose dark gets a white flash. A
-reader with scripting off never sees the control — it ships hidden — and keeps
-the system-following behaviour, which is what everybody had before it existed.
+There is one palette and it is dark. A light theme existed, was the default,
+and was never what this looked right in: the screen is an instrument panel, and
+a panel is dark because the reading matters more than the surface it sits on.
+Carrying the second theme meant every colour declaring a value nobody saw and
+every new colour needing two, so it is gone along with the control that
+switched between them.
 
 ```bash
 npm install && npm test        # TypeScript: commitment core + verification pipeline

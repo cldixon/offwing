@@ -1808,7 +1808,7 @@ describe('the chrome tells a first-time visitor what this is', () => {
     const body = await (await app.request('/')).text()
     assert.match(
       body,
-      /<a href="\/about" class=""><span class="ico"><svg[^>]*>.*?<\/svg><\/span>\s*<span class="full">What this is<\/span><span class="tab">About<\/span><\/a>/s,
+      /<a href="\/about" class=""><span class="ico"><svg[^>]*>.*?<\/svg><\/span>\s*<span class="full">More info<\/span><span class="tab">Info<\/span><\/a>/s,
     )
 
     const page = await app.request('/about')
@@ -1846,23 +1846,21 @@ describe('the chrome tells a first-time visitor what this is', () => {
     assert.ok(!body.includes('compose-row'), 'the compose row is back')
   })
 
-  test('the theme toggle is a control that works before it is offered', async () => {
+  /**
+   * There was a toggle, and two palettes behind it. The product is an
+   * instrument panel: it was only ever right in the dark one, and keeping the
+   * other meant every colour carrying a value nobody saw.
+   */
+  test('there is one theme, and nothing offers to change it', async () => {
     const { app } = await feedApp()
     const body = await (await app.request('/')).text()
 
-    // Shipped hidden: a toggle with scripting off would do nothing at all,
-    // and those readers keep the system-following behaviour they had.
-    assert.match(body, /<button type="button" class="themeswitch" id="theme" hidden/)
-    assert.match(body, /localStorage\.setItem\('offwing\.theme'/)
-
-    // Applied in the head, before the first paint, or a reader who chose dark
-    // gets a white page for a frame.
-    const head = body.slice(0, body.indexOf('</head>'))
-    assert.match(head, /localStorage\.getItem\('offwing\.theme'\)/)
-
-    // One attribute drives it, because every colour is a light-dark() pair.
-    assert.match(body, /:root\[data-theme="dark"\] \{ color-scheme: dark; \}/)
-    assert.match(body, /--bg: light-dark\(/)
+    assert.match(body, /color-scheme: dark;/)
+    assert.ok(!body.includes('light-dark('), 'a second palette is back')
+    assert.ok(!body.includes('data-theme'), 'the toggle\'s attribute is back')
+    assert.ok(!body.includes('prefers-color-scheme'), 'the page still asks')
+    assert.ok(!body.includes('offwing.theme'), 'a stored choice is back')
+    assert.ok(!/id="theme"/.test(body), 'the control is back')
   })
 
   test('the tab says what the page is, and the icon is drawn rather than fetched', async () => {

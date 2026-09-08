@@ -1048,8 +1048,18 @@ export function accountPage(params: {
   const tabHref = (tab: AccountTab) =>
     tab === 'releases' ? base : `${base}?tab=${tab}`
 
-  const fact = (label: string, value: string) =>
-    html`<div><dt>${label}</dt><dd class="mono">${value}</dd></div>`
+  /**
+   * One identifier, with what it is on hover.
+   *
+   * Three strings of characters under an organisation's name mean nothing to
+   * a reader who has not spent a career around this paperwork, and two of the
+   * three are invented anyway. The note says what the thing is in the real
+   * world and then whether this particular one is real here, because a
+   * demonstration that lets a visitor mistake a made-up certificate number
+   * for a live one has done the opposite of its job.
+   */
+  const fact = (label: string, value: string, what: string) =>
+    html`<div title="${what}"><dt>${label}</dt><dd class="mono">${value}</dd></div>`
 
   return layout(
     name,
@@ -1077,20 +1087,45 @@ export function accountPage(params: {
         <!-- Deliberately not "member since". Nothing on this network records
              when an organization joined it, and there is no membership to
              date from — an account is a repository that started publishing.
-             So the claim is the one this observer can actually support: when
-             it first saw that happen. It moves if the index is rebuilt, which
-             is why the exact moment is on hover and only the month is on the
-             line. -->
+             The line reads as a plain fact about the organization and the
+             hover keeps the precise one: what this observer can actually
+             support is when it first saw that repository publish, which moves
+             if the index is rebuilt. Hence the month on the line and the
+             moment, with its qualification, on hover. -->
         ${a.firstSeen
           ? html`<span class="since" title="First record observed here ${fmt(a.firstSeen)}"
-            >Observed since ${monthYear(a.firstSeen)}</span>`
+            >Active since ${monthYear(a.firstSeen)}</span>`
           : ''}
       </div>
 
       <dl class="facts">
-        ${a.cage ? fact('CAGE', a.cage) : ''}
-        ${a.certificate ? fact('Certificate', a.certificate) : ''}
-        ${fact('DID', a.did)}
+        ${a.cage
+          ? fact(
+              'CAGE',
+              a.cage,
+              'Commercial and Government Entity code: the identifier a ' +
+                'government assigns to an organisation so that defence and ' +
+                'aerospace records can name it unambiguously. Invented for ' +
+                'this demonstration.',
+            )
+          : ''}
+        ${a.certificate
+          ? fact(
+              'Certificate',
+              a.certificate,
+              'The number on the repair station certificate an aviation ' +
+                'authority issues, which is what allows an organisation to ' +
+                'approve a part for return to service. Invented for this ' +
+                'demonstration.',
+            )
+          : ''}
+        ${fact(
+          'DID',
+          a.did,
+          'Decentralised identifier: the permanent name this account signs ' +
+            'under, and where its public keys are published. Real — this DID ' +
+            'exists on the AT Protocol network and resolves outside this app.',
+        )}
       </dl>
 
       <!-- One word under each number. The words carried their own
@@ -1100,37 +1135,18 @@ export function accountPage(params: {
       <div class="counts">
         <div title="Release certificates issued from this repository"
           ><b>${params.stats.releases}</b><span>Releases</span></div>
-        <!-- Still two numbers rather than one, and still never a score. A
-             release nobody has vouched for is the ordinary case: most checks
-             in a real supply chain are never announced at all. -->
-        <div title="Releases of this account's that somebody else has published an attestation on"
-          ><b>${params.stats.releases === 0
-            ? // "0 of 0" is not a fact about coverage, it is a restatement of
-              // the count beside it, and on an operator — which issues nothing
-              // by design — it reads as a shortfall rather than as a category
-              // that does not apply.
-              '—'
-            : `${params.stats.attested} of ${params.stats.releases}`}</b
-          ><span>Vouched</span></div>
         <div title="Attestations this account published on other organizations' releases"
           ><b>${params.stats.checks}</b><span>Attestations</span></div>
       </div>
 
-      <!-- The disclaimer, in one line rather than four.
-           It used to explain the whole of why a station profile is not
-           evidence, which is true, correct, and three sentences of throat-
-           clearing above the thing the reader came for. The argument belongs
-           in the documentation; what belongs here is the fact and the
-           recourse — and naming the recourse is the honest half, because this
-           application is not it. No AppView can adjudicate a false profile,
-           and one that offered a "report" button would be claiming an
-           authority nobody has given it. -->
+      <!-- Nothing under the counts when there is a profile to read. The line
+           that used to sit here said the details are self-asserted and that
+           recourse is a regulator's business, which is true and is the
+           argument the documentation makes at length; above a page somebody
+           came to read, it was a paragraph of throat-clearing on every visit.
+           What remains is the case where there is genuinely nothing to say. -->
       ${a.displayName
-        ? html`<p class="selfsaid">
-            Profile details are provided by the account holder and verified by
-            nobody. Anything suspicious is for your governing regulatory
-            authority, not for this application.
-          </p>`
+        ? ''
         : html`<p class="noprofile">
             This organization has published no profile, so this observer knows
             it only as a repository that signs records.

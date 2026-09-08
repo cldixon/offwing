@@ -123,11 +123,42 @@ describe('the account header', () => {
    * can adjudicate a false profile; a "report" button here would be claiming
    * an authority nobody granted.
    */
-  test('says the profile is unverified, and where that belongs instead', async () => {
+  /**
+   * The header used to carry a paragraph saying the details are self-asserted
+   * and that a false one is a regulator's business. Both true, and both an
+   * argument the documentation makes at length; on every visit to every
+   * profile it was throat-clearing above the thing the reader came for. The
+   * case where there is genuinely nothing to read still speaks.
+   */
+  test('a profile is not prefaced with its own disclaimer', async () => {
     const { app } = await accountApp(shopProfile)
     const body = await (await app.request(`/profile/cascadia-mro.${DOMAIN}`)).text()
-    assert.match(body, /verified by\s+nobody/)
-    assert.match(body, /regulatory\s+authority/, 'the recourse is not named')
+    assert.ok(!/verified by\s+nobody/.test(body), 'the disclaimer is back')
+    assert.ok(!/regulatory\s+authority/.test(body), 'the disclaimer is back')
+
+    const bare = await accountApp((i) => {
+      i.setHandle(MRO, `cascadia-mro.${DOMAIN}`)
+      i.setActor({ did: MRO, kind: 'mro' })
+    })
+    const nothing = await (
+      await bare.app.request(`/profile/cascadia-mro.${DOMAIN}`)
+    ).text()
+    assert.match(nothing, /published no profile/)
+  })
+
+  /**
+   * Three strings of characters under a name, two of them invented. What each
+   * one is in the real world, and whether this particular one is real here,
+   * is on hover — a demonstration that lets a visitor take a made-up
+   * certificate number for a live one has done the opposite of its job.
+   */
+  test('the identifiers say what they are, and which of them are real', async () => {
+    const { app } = await accountApp(shopProfile)
+    const body = await (await app.request(`/profile/cascadia-mro.${DOMAIN}`)).text()
+
+    assert.match(body, /title="Commercial and Government Entity code[^"]*Invented for this demonstration\."/)
+    assert.match(body, /title="The number on the repair station certificate[^"]*Invented for this demonstration\."/)
+    assert.match(body, /title="Decentralised identifier[^"]*exists on the AT Protocol network[^"]*"/)
   })
 
   /** The handle is somebody's name on a network, and reads as one. */
@@ -153,8 +184,11 @@ describe('the account header', () => {
       })
     })
     const body = await (await app.request(`/profile/cascadia-mro.${DOMAIN}`)).text()
-    assert.match(body, /Observed since March 2026/)
+    assert.match(body, /Active since March 2026/)
     assert.ok(!body.includes('Member since'), 'claimed a membership nothing records')
+    // The line is the plain reading; the precise fact, and what qualifies it,
+    // stays on hover.
+    assert.match(body, /title="First record observed here [^"]*"/)
   })
 
   /**

@@ -27,9 +27,8 @@ import type { Actor } from './writer.js'
  * The stylesheet, inlined into every page.
  *
  * Two files under styles/: tokens.css is the design system — every colour,
- * typeface, size, radius, shadow and duration the interface may use, in both
- * themes — and app.css is the components, written only in terms of those
- * tokens. They are read once at startup and served inside a <style> element,
+ * typeface, size, radius, shadow and duration the interface may use — and
+ * app.css is the components, written only in terms of those tokens. They are read once at startup and served inside a <style> element,
  * so a page is still a single request and works with no build step. The
  * fonts are the one thing fetched from elsewhere.
  */
@@ -208,13 +207,6 @@ const ICONS: Record<string, string> = {
   plus: '<path d="M5 12h14"/><path d="M12 5v14"/>',
   // info: what this whole thing is
   info: '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>',
-  // sun / moon: the theme toggle shows the theme it would switch to
-  sun:
-    '<circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/>' +
-    '<path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/>' +
-    '<path d="M2 12h2"/><path d="M20 12h2"/>' +
-    '<path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>',
-  moon: '<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>',
 }
 
 export function icon(name: string) {
@@ -503,56 +495,6 @@ const BUNDLES_SCRIPT = `
 })()
 `
 
-/**
- * The stored theme, applied before the page paints.
- *
- * In the head and synchronous on purpose. Everything else in this file loads
- * at the foot of the body, but a theme applied after the first paint is a
- * white page flashing at somebody who chose dark, which is worse than not
- * offering the choice.
- *
- * It stamps the attribute only when there is a stored choice. With none, no
- * attribute is set and tokens.css follows the system — including when the
- * reader's system flips from light to dark while the page is open, which a
- * stamped attribute would freeze.
- */
-const THEME_BOOT_SCRIPT = `
-(function () {
-  try {
-    var t = localStorage.getItem('offwing.theme')
-    if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t
-  } catch (e) {}
-})()
-`
-
-/**
- * The theme toggle.
- *
- * The button ships hidden and this reveals it, so a visitor with scripting off
- * is not offered a control that cannot work — they keep the system-following
- * behaviour, which is the same thing everybody had before the toggle existed.
- *
- * The first press has to decide what "the other one" means when nothing has
- * been chosen yet, and the honest answer is whatever the reader is currently
- * looking at: the attribute if one is set, and the system preference if not.
- */
-const THEME_SCRIPT = `
-(function () {
-  var btn = document.getElementById('theme')
-  if (!btn) return
-  var root = document.documentElement
-  btn.hidden = false
-  btn.addEventListener('click', function () {
-    var dark = root.dataset.theme
-      ? root.dataset.theme === 'dark'
-      : window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
-    var next = dark ? 'light' : 'dark'
-    root.dataset.theme = next
-    try { localStorage.setItem('offwing.theme', next) } catch (e) {}
-  })
-})()
-`
-
 export function layout(
   title: string,
   body: HtmlEscapedString | Promise<HtmlEscapedString>,
@@ -576,7 +518,6 @@ export function layout(
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="${FONTS_URL}">
 <style>${raw(STYLES)}</style>
-${raw(`<script>${THEME_BOOT_SCRIPT}</script>`)}
 </head>
 <body>
 <div class="marker">
@@ -637,7 +578,7 @@ ${raw(`<script>${THEME_BOOT_SCRIPT}</script>`)}
            nobody looks; the one screen that says what any of this is for
            should be somewhere a visitor is already reading. -->
       <a href="/about" class="${on('about')}"><span class="ico">${icon('info')}</span>
-        <span class="full">What this is</span><span class="tab">About</span></a>
+        <span class="full">More info</span><span class="tab">Info</span></a>
     </nav>
     ${actors.length > 0
       ? me
@@ -648,25 +589,7 @@ ${raw(`<script>${THEME_BOOT_SCRIPT}</script>`)}
             ><span class="full">Create release</span
             ><span class="tab">${icon('plus')}</span></span>`
       : ''}
-    <!-- The foot of the rail: the two things that are about this reader
-         rather than about the network — who they are acting as, and which
-         theme to paint it in — under one rule, away from the pages. On a
-         phone this is display:contents so both become items of the top bar's
-         grid.
-
-         The switch is hidden until the script that makes it work has run: a
-         control that does nothing is worse than one that is not there. Both
-         faces are in the markup and the stylesheet shows the one that is not
-         currently painted, which is the theme it would switch to. -->
-    <div class="railfoot">
-      ${actors.length > 0 ? identity(chrome!) : ''}
-      <button type="button" class="themeswitch" id="theme" hidden
-        title="Switch between light and dark"
-        aria-label="Switch between light and dark"
-        ><span class="t-moon">${icon('moon')}<span class="label">Dark</span></span
-        ><span class="t-sun">${icon('sun')}<span class="label">Light</span></span
-      ></button>
-    </div>
+    ${actors.length > 0 ? identity(chrome!) : ''}
   </aside>
   <main>
     ${body}
@@ -674,7 +597,6 @@ ${raw(`<script>${THEME_BOOT_SCRIPT}</script>`)}
 </div>
 ${withComposer ? composer() : ''}
 ${withComposer ? html`${raw(`<script>${COMPOSER_SCRIPT}</script>`)}` : ''}
-${raw(`<script>${THEME_SCRIPT}</script>`)}
 ${raw(`<script>${BUNDLES_SCRIPT}</script>`)}
 ${actors.length > 0 ? html`${raw(`<script>${SWITCHER_SCRIPT}</script>`)}` : ''}
 </body>

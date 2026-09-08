@@ -663,34 +663,6 @@ main { padding: var(--s-5) 0 5rem; min-width: 0; }
   letter-spacing: var(--track-display); text-transform: uppercase; white-space: nowrap;
 }
 
-/* The theme switch, at the foot of the rail under identity: a preference
-   about this reader rather than a page, so it sits with the other one. Drawn
-   as a quieter nav item — the same row, the same icon box, no active rule. */
-.themeswitch {
-  display: flex; align-items: center; gap: var(--s-3); width: 100%;
-  margin: 0; padding: var(--nav-pad); border: 0; border-radius: 0;
-  /* The same transparent rule every nav item carries, so its icon sits on
-     the same vertical as theirs rather than three pixels to the left. */
-  border-left: var(--bw-rule) solid transparent;
-  background: none; color: var(--muted);
-  font: var(--w-medium) var(--fs-14)/var(--lh-body) var(--font-body);
-  text-transform: none; letter-spacing: normal; text-align: left; cursor: pointer;
-}
-.themeswitch:hover { filter: none; }
-.themeswitch:hover { background: var(--skip-bg); color: var(--fg); }
-.themeswitch > span { display: flex; align-items: center; gap: var(--s-3); }
-.themeswitch .ico-svg { width: 1.05rem; height: 1.05rem; }
-/* It shows the theme it would switch to, which is the one not being painted.
-   With no stored choice there is no attribute, so the system preference
-   decides — the same question tokens.css asks. */
-.themeswitch .t-sun { display: none; }
-.themeswitch .t-moon { display: flex; }
-:root[data-theme="dark"] .themeswitch .t-sun { display: flex; }
-:root[data-theme="dark"] .themeswitch .t-moon { display: none; }
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme]) .themeswitch .t-sun { display: flex; }
-  :root:not([data-theme]) .themeswitch .t-moon { display: none; }
-}
 .rail nav { display: flex; flex-direction: column; gap: var(--nav-gap); }
 /* The active item is marked by a rule down its left edge rather than a fill.
    The transparent rule on every item keeps the text from shifting. */
@@ -719,12 +691,8 @@ main { padding: var(--s-5) 0 5rem; min-width: 0; }
 
 /* Identity under the rail rather than pinned to the foot of it. Pinning
    wants a full-height rail, and a full-height rail under a banner of unknown
-   height overflows the viewport by exactly the banner.
-
-   It shares a rule with the theme switch, the two being what this reader has
-   chosen rather than anywhere they can go. */
-.railfoot { border-top: var(--bw) solid var(--line); padding-top: var(--s-4); }
-.railfoot .themeswitch { margin-top: var(--s-2); }
+   height overflows the viewport by exactly the banner. */
+.me { border-top: var(--bw) solid var(--line); padding-top: var(--s-5); }
 .me > summary {
   list-style: none; cursor: pointer; padding: var(--s-2) var(--s-3); border-radius: var(--r-inner);
   display: flex; align-items: center; gap: var(--s-3);
@@ -830,10 +798,16 @@ main { padding: var(--s-5) 0 5rem; min-width: 0; }
   padding-top: var(--s-3); border-top: var(--bw) solid var(--line);
 }
 .account .facts > div { display: flex; align-items: baseline; gap: var(--s-2); min-width: 0; }
+/* Each fact carries a note saying what it is, so the label is marked as a
+   term with a definition rather than left as a caption a reader is assumed to
+   know. The dotted rule is the affordance; the pointer confirms it. */
+.account .facts > div { cursor: help; }
 .account .facts dt {
   font: var(--w-bold) var(--fs-10)/var(--lh-body) var(--font-mono); letter-spacing: var(--track-label-wide);
   color: var(--muted); text-transform: uppercase; white-space: nowrap;
+  border-bottom: var(--bw) dotted var(--line);
 }
+.account .facts > div:hover dt { color: var(--sub); border-bottom-color: var(--sub); }
 .account .facts dd { margin: 0; font-family: var(--font-mono); font-size: var(--fs-13); word-break: break-all; }
 /* Counts, not a score. Three numbers with the sentence that says what each one
    is, because "5 of 12" over a shop means nothing without "checked by someone
@@ -854,7 +828,6 @@ main { padding: var(--s-5) 0 5rem; min-width: 0; }
   font: var(--w-regular) var(--fs-11)/var(--lh-body) var(--font-mono); color: var(--muted);
   text-transform: uppercase; letter-spacing: var(--track-label);
 }
-.account .selfsaid { margin: var(--s-3) 0 0; font-size: var(--fs-12); color: var(--muted); }
 .account .noprofile {
   margin: var(--s-3) 0 0; padding-top: var(--s-3); border-top: var(--bw) solid var(--line);
   font-size: var(--fs-13); color: var(--muted);
@@ -1092,20 +1065,12 @@ dialog#about .cbody p { margin: 0 0 var(--s-2); }
   .rail .mark { display: contents; }
   .rail .brand { grid-area: 1 / 1; }
   .brand { font-size: var(--fs-26); }
-  /* Both take the whole second row and the switch sits on top of its right
-     end, rather than the tagline taking the column the account control's
-     width decides — that column is what is left after a long organisation
-     name, which is not enough for a line of text. */
+  /* The tagline takes the whole second row, rather than the column the
+     account control's width decides — that column is what is left after a
+     long organisation name, which is not enough for a line of text. */
   .rail .tagline {
-    grid-area: 2 / 1 / 3 / -1; white-space: normal; padding-right: 2.5rem;
-    font-size: var(--fs-11);
+    grid-area: 2 / 1 / 3 / -1; white-space: normal; font-size: var(--fs-11);
   }
-  /* Icon only up here: the label belongs to a rail that has room for it. */
-  .themeswitch {
-    grid-area: 2 / 1 / 3 / -1; justify-self: end; width: auto; margin: 0;
-    padding: var(--s-1); border-left: 0; border-radius: var(--r-inner);
-  }
-  .themeswitch .label { display: none; }
 
   /* And the links become a tab bar pinned to the bottom of the viewport. The
      active item's rule moves from its left edge to its top edge. */
@@ -1148,10 +1113,11 @@ dialog#about .cbody p { margin: 0 0 var(--s-2); }
   .rail .newpost .tab .ico-svg { width: 1.6rem; height: 1.6rem; }
   .rail .newpost.off { box-shadow: none; }
 
-  /* Identity sits at the top right, and its menu drops from there; the
-     switch drops to the second row beside the tagline. */
-  .railfoot { display: contents; }
-  .me { grid-area: 1 / 2; position: relative; justify-self: end; }
+  /* Identity sits at the top right, and its menu drops from there. */
+  .me {
+    grid-area: 1 / 2; position: relative; justify-self: end;
+    border-top: 0; padding-top: 0;
+  }
   .me > summary { padding: var(--s-1) .3rem; }
   .me .av { width: var(--av-md); height: var(--av-md); font-size: var(--fs-11); }
   .me .who b { max-width: 8.5rem; }
