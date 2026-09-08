@@ -1763,8 +1763,7 @@ export function feedPage(params: {
   const body = html`
     <h1>Feed</h1>
     <p class="sub">
-      Every released certificate is published to the network. Receivers have
-      the option to publish their verification too.
+      Every released certificate is published to the network.
     </p>
 
     ${!params.hasIndex

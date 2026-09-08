@@ -64,7 +64,7 @@ code, .mono { font-family: var(--font-mono); font-size: .875em; }
    There used to be three or four before any content; a warning repeated that
    often is read as furniture and stops working. */
 .marker {
-  background: var(--warn-bg); border-bottom: var(--bw) solid var(--line);
+  background: var(--card); border-bottom: var(--bw-rule) solid var(--accent-rule);
   font-size: var(--fs-13); color: var(--sub); text-align: center;
   padding: .45rem var(--gutter);
 }
