@@ -10,6 +10,7 @@ You can explore the [live app](https://offwing.cldixon.dev) to try it out and re
 
 Whenever parts are removed from an aircraft and shipped to outside repair vendors, they must be tracked with an accompanying FAA 8130-3 document (or variation depending on regulatory authority). When a part is sold on secondary markets, its entire history must be accounted for by its lineage of these documents. Yet, most players in the aviation maintenance industry keep these documents in paper and PDF formats.
 
+**Example 8130-3 document**
 ![FAA 8130-3 document](images/faa-8130-example.png)
 
 At best, this leads to inefficiencies and unavailability of critical data for operators. In worse cases, it has been susceptible to fraud and fabrication. One challenge is that these documents do include some amount of proprietary information, such as notes on the repairs taken and outcome. Neither the repair vendor nor the operators want this information to be publicly visible. Other information in the documents, such as part number, serial number, etc., could be made public and are essential later in the verifying that a part has all of its historical 8130 documents accounted for.
