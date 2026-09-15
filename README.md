@@ -1,14 +1,14 @@
-# Offwing — verifiable release certificates on AT Protocol
+# Offwing: 8130 certificates on AT Protocol
 
-> ## ⚠️ ALL DATA IN THIS REPOSITORY IS SYNTHETIC
->
-> Fictional organizations, fictional CAGE codes, non-existent part numbers.
-> Nothing here is an airworthiness record, and nothing here is an accepted
-> scheme for one. FAA AC 120-78A permits electronic records and signatures,
-> but a DID-signed record is **not** an approved method. This is a protocol
-> demonstration and must never be presented as an airworthiness system.
+⚠️ THIS IS A PROOF-OF-CONCEPT FOR DEMONSTRATION ONLY. ALL DATA IS SYNTHETIC.
 
-A demonstration that FAA 8130-3 Authorized Release Certificates, and the
+**Offwing** is a demonstration of the AT Protocol applied to solve interesting problems beyond social media apps.
+
+You can explore the [live app](https://offwing.cldixon.dev) to try it out and read the [blog post](https://cldixon.com/blog/offwing) for more context.
+
+
+
+that FAA 8130-3 Authorized Release Certificates, and the
 back-to-birth traceability behind them, can be made cryptographically
 verifiable using AT Protocol as the identity, storage, and distribution
 layer — while disclosing none of the commercially sensitive contents.
@@ -105,88 +105,226 @@ people find surprising and it is the shape of the guarantee.
 A document that checks out can be attested to, optionally. A document that
 does not offers nothing to publish, for the reason above.
 
-## Synthetic activity
 
-The demonstration writes itself. While anybody is watching the feed, a
-generator issues releases, ships them to recipients, and publishes
-attestations — real records, really signed, into real repositories.
 
-Block 7 and Block 12 are narrated by Claude Sonnet when `ANTHROPIC_API_KEY` is
-set, and come from a built-in catalogue when it is not; the caller cannot tell
-which, and both are valid seventeen-block forms. Every identifier, date and
-regulatory field is composed by code rather than by the model — a part number
-is derived from an invented prefix registry, which removes the entire class of
-"the model invented a real part number" from a system that publishes
-permanently.
+## The lexicon
+
+<!-- TODO: prose. -->
+
+Three record types, all under `dev.cldixon.f8130`. Descriptions are elided
+here; the full definitions, which carry the reasoning for every field, are in
+[`lexicons/`](lexicons/dev/cldixon/f8130).
+
+**`release`** — the public commitment to one 8130-3. A Merkle root over all
+seventeen committed blocks, plus the nine of them needed to find the record and
+know who signed it. The form itself never appears.
+
+```json
+{
+  "lexicon": 1,
+  "id": "dev.cldixon.f8130.release",
+  "defs": { "main": {
+    "type": "record",
+    "key": "tid",
+    "record": {
+      "type": "object",
+      "required": ["commitment", "issuerDid", "approvingAuthority", "formNumber",
+                   "organizationName", "organizationAddress", "description",
+                   "partNumber", "serialNumber", "signerCert", "completedAt"],
+      "properties": {
+        "commitment":          { "type": "bytes",   "minLength": 32, "maxLength": 32 },
+        "fieldSetVersion":     { "type": "integer", "minimum": 1 },
+        "issuerDid":           { "type": "string",  "format": "did" },
+        "prev":                { "type": "ref",     "ref": "com.atproto.repo.strongRef" },
+        "subject":             { "type": "string",  "maxLength": 512 },
+        "approvingAuthority":  { "type": "string",  "maxLength": 128 },
+        "formNumber":          { "type": "string",  "maxLength": 128 },
+        "organizationName":    { "type": "string",  "maxLength": 256 },
+        "organizationAddress": { "type": "string",  "maxLength": 512 },
+        "description":         { "type": "string",  "maxLength": 256 },
+        "partNumber":          { "type": "string",  "maxLength": 128 },
+        "serialNumber":        { "type": "string",  "maxLength": 128 },
+        "signerCert":          { "type": "string",  "maxLength": 128 },
+        "completedAt":         { "type": "string",  "format": "datetime" }
+      }
+    }
+  }}
+}
+```
+
+| field | 8130-3 block | |
+|---|---|---|
+| `approvingAuthority` | 1 | approving civil aviation authority and country |
+| `formNumber` | 3 | form tracking number |
+| `organizationName`, `organizationAddress` | 4 | the issuing organization — already implied by whose repo this is |
+| `description` | 7 | what the item is |
+| `partNumber` | 8 | |
+| `serialNumber` | 10 | |
+| `signerCert` | 13c / 14c | the approval or certificate number released under |
+| `completedAt` | 13e / 14e | claimed completion — attacker-controlled, compare against an observer's own clock |
+
+The other eight committed blocks are not here and that is the design — Block 5
+(work order), 6 (item), 9 (quantity), 11 (status), 12 (remarks), 13/14 (which
+certifying block was used), 13a/14a (approval basis) and 13d/14d (signer name).
+The commitment covers all seventeen; the record publishes nine.
+
+`prev` is a strong reference to the previous shop visit for the same serial, so
+the chain can be walked backwards and each link pinned by CID. Absent means
+birth — which is why whether a record claims to be a birth record stays
+publicly inferable however the rest of the split is drawn.
+
+**`attestation`** — somebody held the paper, ran the check, and it passed.
+Written into the checker's own repo, so the issuer cannot suppress it. There is
+deliberately no counterpart for a failure.
+
+```json
+{
+  "lexicon": 1,
+  "id": "dev.cldixon.f8130.attestation",
+  "defs": { "main": {
+    "type": "record",
+    "key": "tid",
+    "record": {
+      "type": "object",
+      "required": ["subject", "verifiedAt", "synthetic"],
+      "properties": {
+        "subject":    { "type": "ref",    "ref": "com.atproto.repo.strongRef" },
+        "verifiedAt": { "type": "string", "format": "datetime" },
+        "synthetic":  { "type": "string", "maxLength": 200 }
+      }
+    }
+  }}
+}
+```
+
+`subject` is a strong reference rather than a bare URI because the CID pins the
+exact bytes that were checked: the attestation cannot be read as covering a
+later, different record at the same URI.
+
+**`station`** — an organization's self-published profile, so an AppView learns
+the cast by reading the network instead of from a table it shipped. Nothing
+here is committed to by any release: what a shop calls itself is not a property
+of the work it certified.
+
+```json
+{
+  "lexicon": 1,
+  "id": "dev.cldixon.f8130.station",
+  "defs": { "main": {
+    "type": "record",
+    "key": "literal:self",
+    "record": {
+      "type": "object",
+      "required": ["displayName", "kind", "synthetic"],
+      "properties": {
+        "displayName": { "type": "string", "maxLength": 128 },
+        "kind":        { "type": "string", "knownValues": ["oem", "mro", "operator", "broker", "lessor"] },
+        "cage":        { "type": "string", "maxLength": 32 },
+        "certificate": { "type": "string", "maxLength": 64 },
+        "synthetic":   { "type": "string", "maxLength": 200 }
+      }
+    }
+  }}
+}
+```
+
+Every record type carries a required `synthetic` marker, and `release` carries
+it in the bundle rather than the schema. Nothing published here can be mistaken
+for an airworthiness record by a reader who parses it.
 
 ## Architecture
 
-The load-bearing line in this diagram is the dashed one. Everything to its
-right reads the repositories **only** over XRPC and the firehose — never the
-PDS's disk or database, even though they run in the same Railway project.
-Break that once and the demonstration becomes a normal database with extra
-steps.
+Every entity in the demonstration, and every wire between them.
 
 ```mermaid
 flowchart LR
-    subgraph pds["pds · f8130.cldixon.dev"]
+
+    subgraph OFFNET["OFF THE NETWORK"]
         direction TB
-        R1["3 manufacturers<br/>13 repair stations"]
-        R2["8 operators"]
-        R3["3 brokers<br/>2 lessors"]
-        R4["29 repos, one per<br/>organization, each<br/>signing its own records"]
+        CRATE["a part in a crate,<br/>with its paper 8130-3"]
+        BUNDLE["THE BUNDLE<br/>all 17 block values + their nonces<br/>printed as a code beside the form"]
+        CRATE --- BUNDLE
     end
 
-    subgraph appview["AppView A — this project"]
-        ING["ingest<br/>verifies every commit<br/>signature itself"]
-        PG[("Postgres<br/>derived index<br/>rebuildable")]
-        WEB["offwing-web<br/>feed · receiving<br/>accounts · issuers"]
+    subgraph ACTORS["THE CAST — 29 organizations, each its own legal entity"]
+        direction TB
+        ISS["ISSUER — a repair station or OEM<br/>handle: cascadia-mro.f8130.cldixon.dev<br/>a did:plc, and a signing key only it holds"]
+        RCV["RECIPIENT — an operator, broker or lessor<br/>handle: example-air.f8130.cldixon.dev<br/>a did:plc, and a signing key only it holds"]
     end
 
-    WD["AppView B — watchdog<br/>own index, own questions"]
+    subgraph IDENT["IDENTITY — public infrastructure, nobody's to switch off"]
+        direction TB
+        WK["the organization's own domain<br/>/.well-known/atproto-did<br/>handle to DID"]
+        PLC["plc.directory<br/>DID to signing key, key history,<br/>and which PDS holds the repo"]
+        WK --> PLC
+    end
 
-    pds -. "firehose<br/>subscribeRepos" .-> ING
-    ING --> PG
-    PG --> WEB
-    pds -. "XRPC sync.getRecord<br/>signed inclusion proofs" .-> WEB
-    pds -. "same firehose,<br/>no shared anything" .-> WD
+    subgraph PDS["PDS · f8130.cldixon.dev — where the records live"]
+        direction TB
+        REPOS["29 atproto repos, one per organization.<br/>every commit signed by that organization's own key"]
+        LEX["release — Merkle root over all 17 blocks, plus 9 of them<br/>attestation — somebody held this document and it checked out<br/>station — who this organization says it is"]
+        REPOS --- LEX
+    end
+
+    subgraph AVA["APPVIEW A — offwing, this project"]
+        direction TB
+        INGA["ingest · Go<br/>verifies every commit signature itself"]
+        DBA[("Postgres<br/>derived index, never authoritative,<br/>rebuildable from sequence zero")]
+        WEBA["offwing-web · offwing.cldixon.dev<br/>feed · parts · accounts · issuers · receiving · form view"]
+        VER["the verifier — 7 stages<br/>identity · record · signature · commitment<br/>public fields · physical part · chain to birth<br/>CONSULTS NO DATABASE"]
+        INGA --> DBA -- "discovery" --> WEBA
+        WEBA --- VER
+    end
+
+    subgraph AVB["APPVIEW B — watchdog, a stranger with no permission to ask for"]
+        direction TB
+        INGB["watchdog-ingest"]
+        DBB[("Postgres<br/>its own index")]
+        WEBB["watchdog<br/>contradictions between records<br/>issuers published themselves"]
+        INGB --> DBB --> WEBB
+    end
+
+    ISS == "hands over the part<br/>and the bundle, bilaterally" ==> RCV
+    ISS -- "writes a release into its own repo" --> REPOS
+    RCV -- "writes an attestation into its own repo" --> REPOS
+
+    REPOS -. "firehose · com.atproto.sync.subscribeRepos<br/>over Railway's private network" .-> INGA
+    REPOS -. "the same firehose, over the public internet.<br/>no shared database, code, API or agreement" .-> INGB
+
+    BUNDLE -. "recomputed against the published root" .-> VER
+    VER -. "resolve the issuer" .-> WK
+    VER -. "XRPC com.atproto.sync.getRecord<br/>signed MST inclusion proof" .-> REPOS
 ```
 
-Two paths run through the app, and they are genuinely independent:
+Reading the key:
 
-```mermaid
-flowchart TB
-    Q1["Browsing<br/>what parts exist? who has vouched for them?"]
-    Q2["Verifying<br/>is this specific document real?"]
+| | |
+|---|---|
+| **solid** | a write, by the organization whose key signs it |
+| **dotted** | a read, over a published protocol surface and nothing else |
+| **thick** | the physical handover — no network involved, and no AppView ever sees it |
 
-    Q1 --> PG[("Postgres index")] --> A1["needs ingest to have<br/>seen the record"]
-    Q2 --> X["ask the issuer's own server<br/>for signed bytes"] --> A2["needs nothing but<br/>the internet"]
-```
+Three things the diagram is drawn to make load-bearing:
 
-Verification consults **no database**. It resolves the handle through DNS,
-asks that issuer's PDS for a signed record proof, recomputes the commitment
-from the document in your hand, then follows `prev` references to birth —
-crossing whatever servers the chain happens to span. The index exists purely
-for discovery, which is why the app still verifies documents correctly with
+**Nothing to the right of the PDS reads its disk.** `ingest` and `offwing-web`
+run in the same Railway project as the PDS and still take only the firehose and
+XRPC. Break that once and the demonstration becomes a normal database with
+extra steps.
+
+**The index and the verifier are independent.** Browsing — what parts exist,
+who has vouched for them — needs `ingest` to have seen the record. Verification
+needs nothing but the internet: it resolves the handle, asks that issuer's own
+server for signed bytes, recomputes the commitment from the document in your
+hand, then follows `prev` references to birth across whatever servers the chain
+spans. That is why the app still verifies documents correctly with
 `DATABASE_URL` unset.
 
-And the document itself never touches this system at all:
-
-```mermaid
-flowchart LR
-    S["Cascadia MRO<br/>issues the release"]
-    O["Example Air<br/>receives the part"]
-    P["public record:<br/>identifiers + Merkle root"]
-
-    S -- "bundle: all 17 fields<br/>+ nonces, bilaterally" --> O
-    S -- publishes --> P
-    O -- "recomputes root<br/>from the bundle" --> P
-```
-
-Blocks 11 and 12 travel shop-to-customer exactly as paperwork does today. The
-public record carries what identifies the document and who issued it, plus a
-commitment over the whole of it. Anyone can check authorship and integrity;
-nobody learns what was done to the part — and no AppView ever stores a bundle.
+**AppView B is not a component of this system.** It shares the record schemas
+and nothing else — no database, no code, no API, no agreement — and reaches the
+firehose over the public internet like any stranger would, because it is one. A
+release can verify cleanly in A while B sees the same part and serial claimed as
+new by two different stations. Both readings are correct, and no platform
+arbitrates between them.
 
 ## Status
 
@@ -215,12 +353,12 @@ Deliberately not built, and documented as gaps rather than quietly fixed:
 individual counter-signing, aircraft logbooks, revocation, and nonce
 custody — see [Known gaps](#known-gaps).
 
-Run it locally with nothing installed and nothing deployed:
+Run it from a fresh clone with nothing installed and nothing deployed:
 
 ```bash
 npm install
 npm run dev                             # http://localhost:3000
-curl localhost:3000/demo/bundles.json   # genuine, tampered, forged
+curl localhost:3000/demo/bundles.json   # genuine · birth · tampered · forged
 ```
 
 Demo mode serves an in-memory network of real repositories with real signing
@@ -228,36 +366,9 @@ keys and real inclusion proofs. Paste the `tampered` bundle into the verify
 page to see the moment the design is built around: a genuine signature beside
 a commitment that no longer matches.
 
-### How it is painted
-
-The interface has one design system and every screen is drawn from it:
-
-| | |
-|---|---|
-| `web/src/styles/tokens.css` | the vocabulary — palette, type scale, radii, spacing, shadows, motion |
-| `web/src/styles/app.css` | the components, written only in terms of those tokens |
-
-Neither the templates nor `app.css` carry a colour, typeface, size or radius of
-their own; to change how something looks, change the token. The two files are
-read once at startup and inlined into every page, so a page is still a single
-request and there is no build step. The fonts — Barlow Condensed for display,
-Barlow for text, Space Mono for every identifier — are the one thing fetched
-from elsewhere, and each has a system fallback.
-
-There is one palette and it is dark. A light theme existed, was the default,
-and was never what this looked right in: the screen is an instrument panel, and
-a panel is dark because the reading matters more than the surface it sits on.
-Carrying the second theme meant every colour declaring a value nobody saw and
-every new colour needing two, so it is gone along with the control that
-switched between them.
-
-```bash
-npm install && npm test        # TypeScript: commitment core + verification pipeline
-go test ./commitment/          # Go core, against the same vectors
-
-# Database tests need a live PostgreSQL; without the variable they skip.
-F8130_TEST_DSN='postgres://...' go test ./ingest/
-```
+Tests, the cross-language vector contract, the design system and the rules that
+are not negotiable: [DEVELOPMENT.md](DEVELOPMENT.md). Deploying it:
+[DEPLOYMENT.md](DEPLOYMENT.md).
 
 ## Deployment
 
@@ -317,128 +428,3 @@ covered by tests.
 | `PORT` / `HOST` | `3000` / `::` | IPv6 first, falls back to IPv4 |
 | `PLC_URL` | `plc.directory` | identity directory, live mode only |
 | `PDS_HOSTNAME` | `f8130.cldixon.dev` | the domain the roster's handles sit under |
-
-**Live mode is checked rather than believed.** Asking for `live` with no PDS
-behind it used to start the app anyway: no writer, so no issuance and no
-activity, and an index with nothing in it. Every page rendered and the feed was
-empty — broken but healthy-looking, the failure this section opens by warning
-about. The PDS is now probed once at boot, and if it does not answer the
-process runs the self-contained demonstration instead, which needs neither a
-PDS nor a database.
-
-Production is the exception and never falls back: a real deployment whose PDS
-is briefly down must not quietly start serving invented records from its own
-domain. `RAILWAY_ENVIRONMENT_NAME` tells them apart, because the platform sets
-it per environment and it is the one thing a preview does not inherit.
-
-That is what makes pull-request previews work. They are cloned from production
-carrying `F8130_MODE=live` and without the `pds` service, and every one of them
-served an empty feed until the probe existed.
-
-A demo instance says so in the UI and on `/api/health`, so an instance serving
-an in-memory network can never be mistaken for one reading the real thing.
-
-Configuration that matters, recorded because it was not obvious:
-
-- **`railway.json` points the build at `web/Dockerfile`.** This repository holds
-  a Node workspace and a Go module side by side, and Railway's build detection
-  finds `go.mod` at the root first — an early deploy attempt built the Go
-  service by mistake and failed fetching a Go toolchain. Each service declares
-  its own Dockerfile rather than relying on detection. (Setting
-  `RAILWAY_DOCKERFILE_PATH` achieves the same thing if the config file is ever
-  not picked up.)
-- Autodeploy needs the Railway GitHub App to have access to this repository,
-  granted at github.com/settings/installations. Changing any service variable
-  also forces a rebuild from the branch head.
-
-## The demonstration data
-
-Twenty-nine fictional organizations — 3 manufacturers, 13 repair stations,
-8 operators, 3 brokers, 2 lessors — writing releases and attestations into
-their own repositories. The seed writes eight set pieces; a generator keeps
-adding ordinary traffic for as long as anybody is watching the feed.
-
-The set pieces exist to make specific things visible:
-
-| | what it shows |
-|---|---|
-| **Complete history** | a fuel control unit from manufacture to overhaul, accepted by its operator |
-| **Tampered / forged** | fixtures, never published — a genuine signature over an altered document, and a document naming a record that does not exist |
-| **The orphan** | a correctly signed release whose predecessor was never published |
-| **The broker** | three impeccable releases that nobody has ever checked — clean in A, and thin coverage in B, which is weak evidence and reported as such |
-| **The deep chain** | 7 shop visits, 6 organizations, 4 successive owners, 2009 to 2026, reaching birth |
-| **The vanished station** | a trace that dies at an issuer whose identity does not resolve at all |
-| **Ordinary traffic** | 11 unremarkable parts, because a demonstration where every record is a scandal teaches the wrong prior |
-
-The last two failure modes are deliberately different and a buyer needs to tell
-them apart. The orphan says *this record is missing*; the vanished station says
-*the organization that would hold it cannot be found*. One is an unresolvable
-record key under a live identity, the other a well-formed `did:plc` that was
-never registered, so resolution is genuinely attempted and genuinely fails.
-
-Organizations publish their own `station` profile — display name, role, CAGE
-code — so an AppView learns the cast by reading the network rather than from a
-table it hardcoded. None of it is committed to by any release: what a shop
-calls itself is not a property of the work it certified.
-
-Nothing in this roster is real. CAGE codes are seven characters, so they cannot
-collide with a real five-character code however the cast grows.
-
-## Two implementations on purpose
-
-The commitment scheme is meant to be implementable from its specification
-alone. The only way to know whether it actually is — rather than having
-quietly encoded a JavaScript quirk — is to write it twice and make both agree
-byte for byte.
-
-That has already earned its keep. JavaScript's `\s` matches non-breaking
-spaces, Unicode space separators, and the BOM; Go's matches five ASCII
-characters. A form pasted out of a spreadsheet would have canonicalized
-differently in the two languages, and the disagreement would have surfaced
-much later as an unverifiable document rather than as an error.
-
-## Design notes
-
-- **Field order is schema.** Changing the order, membership, or normalization
-  of the committed field set changes every root ever produced. Versioned,
-  never edited.
-- **Nonces are non-negotiable.** 8130-3 fields are extremely low entropy — a
-  status is one of five values. An unsalted commitment is brute-forced
-  instantly by anyone holding the root.
-- **Domain separation prefixes are mandatory.** Without them an internal node
-  can be presented as a leaf.
-- **Null and absent are identical; an empty string is neither.** A shop that
-  wrote nothing in the remarks box committed to an empty remarks box, which is
-  a different claim from having no remarks field.
-- **Bundles never touch server storage.** Holding them would rebuild the
-  central repository of sensitive data the design exists to avoid.
-
-## Known gaps
-
-Stated rather than silently fixed:
-
-- **Nonce custody is unsolved.** Lose the bundle and the part becomes
-  unverifiable even though the commitment stands. Production would need
-  escrow or deterministic nonce derivation from a station-held secret.
-- **Timestamps are claims.** `completedAt` is attacker-controlled; a
-  self-hosted PDS can backdate. Only an independent observer's recorded time
-  means anything, and one observer is a partial defense at best.
-- **No revocation flow** for a release whose issuer is later decertified.
-- **`signerCert` is a string**, not a DID reference. Individual
-  counter-signing and aircraft logbooks are documented extensions,
-  deliberately not built.
-- **Nothing binds a DID to a certificated repair station.** Anyone can
-  register a DID, publish a station profile claiming any certificate number,
-  and issue certificates that verify flawlessly. Verification proves *the
-  entity controlling this DID signed this*, not that the entity is who it says
-  it is. A real system needs an authority — the FAA or an equivalent —
-  publishing the binding. This is the largest gap, and it is why a green check
-  in this application must never be read as airworthiness.
-- **The document never authenticates the part.** Photocopy a genuine
-  certificate and its bundle, attach them to a counterfeit component with a
-  restamped dataplate, and every check passes. No paperwork scheme, digital or
-  otherwise, can close this; it is why the verified screen says so.
-
-## Credits
-
-Design and specification by [@cldixon](https://github.com/cldixon).
