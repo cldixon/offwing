@@ -237,63 +237,50 @@ for an airworthiness record by a reader who parses it.
 Every entity in the demonstration, and every wire between them.
 
 ```mermaid
-flowchart LR
+%%{init: {"flowchart": {"wrappingWidth": 360}}}%%
+flowchart TB
 
-    subgraph OFFNET["OFF THE NETWORK"]
-        direction TB
-        CRATE["a part in a crate,<br/>with its paper 8130-3"]
-        BUNDLE["THE BUNDLE<br/>all 17 block values + their nonces<br/>printed as a code beside the form"]
-        CRATE --- BUNDLE
+    subgraph CAST["THE CAST — 29 organizations, each its own legal entity"]
+        direction LR
+        ISS["ISSUER<br/>a repair station or OEM<br/>cascadia-mro.f8130.cldixon.dev"]
+        RCV["RECIPIENT<br/>an operator, broker or lessor<br/>example-air.f8130.cldixon.dev"]
+        ISS == "hands over the part,<br/>bundle in the box" ==> RCV
     end
 
-    subgraph ACTORS["THE CAST — 29 organizations, each its own legal entity"]
-        direction TB
-        ISS["ISSUER — a repair station or OEM<br/>handle: cascadia-mro.f8130.cldixon.dev<br/>a did:plc, and a signing key only it holds"]
-        RCV["RECIPIENT — an operator, broker or lessor<br/>handle: example-air.f8130.cldixon.dev<br/>a did:plc, and a signing key only it holds"]
+    subgraph PDSBOX["PDS · f8130.cldixon.dev — where the records live"]
+        REPOS["29 atproto repos, one per organization<br/>every commit signed by that organization's own key<br/>records: release · attestation · station"]
     end
 
-    subgraph IDENT["IDENTITY — public infrastructure, nobody's to switch off"]
+    IDENT["IDENTITY · public, unowned<br/>an organization's own domain answers<br/>/.well-known/atproto-did — handle to DID<br/>plc.directory answers the DID document —<br/>signing key, key history, which PDS holds the repo"]
+
+    BUNDLE["THE BUNDLE · never on the network<br/>all 17 block values and their nonces,<br/>printed as a code beside the paper form"]
+
+    subgraph AVB["APPVIEW B — watchdog"]
         direction TB
-        WK["the organization's own domain<br/>/.well-known/atproto-did<br/>handle to DID"]
-        PLC["plc.directory<br/>DID to signing key, key history,<br/>and which PDS holds the repo"]
-        WK --> PLC
+        INGB["watchdog-ingest"] --> DBB[("Postgres<br/>its own index")] --> WEBB["watchdog<br/>contradictions in<br/>the public record"]
     end
 
-    subgraph PDS["PDS · f8130.cldixon.dev — where the records live"]
-        direction TB
-        REPOS["29 atproto repos, one per organization.<br/>every commit signed by that organization's own key"]
-        LEX["release — Merkle root over all 17 blocks, plus 9 of them<br/>attestation — somebody held this document and it checked out<br/>station — who this organization says it is"]
-        REPOS --- LEX
+    subgraph AVA["APPVIEW A — offwing · this project"]
+        direction LR
+        INGA["ingest · Go<br/>verifies every<br/>commit signature"]
+        DBA[("Postgres<br/>derived index<br/>rebuildable")]
+        VER["the verifier · 7 stages<br/>CONSULTS NO DATABASE"]
+        WEBA["offwing-web<br/>offwing.cldixon.dev"]
+        INGA --> DBA
+        DBA -- "discovery: what exists,<br/>who has vouched" --> WEBA
+        VER -- "proof: is this<br/>document real" --> WEBA
     end
 
-    subgraph AVA["APPVIEW A — offwing, this project"]
-        direction TB
-        INGA["ingest · Go<br/>verifies every commit signature itself"]
-        DBA[("Postgres<br/>derived index, never authoritative,<br/>rebuildable from sequence zero")]
-        WEBA["offwing-web · offwing.cldixon.dev<br/>feed · parts · accounts · issuers · receiving · form view"]
-        VER["the verifier — 7 stages<br/>identity · record · signature · commitment<br/>public fields · physical part · chain to birth<br/>CONSULTS NO DATABASE"]
-        INGA --> DBA -- "discovery" --> WEBA
-        WEBA --- VER
-    end
-
-    subgraph AVB["APPVIEW B — watchdog, a stranger with no permission to ask for"]
-        direction TB
-        INGB["watchdog-ingest"]
-        DBB[("Postgres<br/>its own index")]
-        WEBB["watchdog<br/>contradictions between records<br/>issuers published themselves"]
-        INGB --> DBB --> WEBB
-    end
-
-    ISS == "hands over the part<br/>and the bundle, bilaterally" ==> RCV
     ISS -- "writes a release into its own repo" --> REPOS
     RCV -- "writes an attestation into its own repo" --> REPOS
+    RCV == "holds" ==> BUNDLE
 
-    REPOS -. "firehose · com.atproto.sync.subscribeRepos<br/>over Railway's private network" .-> INGA
+    REPOS -. "firehose · subscribeRepos<br/>Railway private network" .-> INGA
     REPOS -. "the same firehose, over the public internet.<br/>no shared database, code, API or agreement" .-> INGB
 
-    BUNDLE -. "recomputed against the published root" .-> VER
-    VER -. "resolve the issuer" .-> WK
-    VER -. "XRPC com.atproto.sync.getRecord<br/>signed MST inclusion proof" .-> REPOS
+    IDENT -. "handle → DID → signing key" .-> VER
+    REPOS -. "XRPC sync.getRecord<br/>signed MST inclusion proof" .-> VER
+    BUNDLE -. "recompute the root" .-> VER
 ```
 
 Reading the key:
@@ -306,9 +293,8 @@ Reading the key:
 
 Three things the diagram is drawn to make load-bearing:
 
-**Nothing to the right of the PDS reads its disk.** `ingest` and `offwing-web`
-run in the same Railway project as the PDS and still take only the firehose and
-XRPC. Break that once and the demonstration becomes a normal database with
+**Nothing below the PDS reads its disk.** `ingest` and `offwing-web` run in the
+same Railway project as the PDS and still take only the firehose and XRPC. Break that once and the demonstration becomes a normal database with
 extra steps.
 
 **The index and the verifier are independent.** Browsing — what parts exist,

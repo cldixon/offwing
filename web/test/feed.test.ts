@@ -1814,14 +1814,11 @@ describe('the chrome tells a first-time visitor what this is', () => {
     const page = await app.request('/about')
     assert.equal(page.status, 200)
     const about = await page.text()
-    for (const claim of [
-      'attributed to a real, reputable repair station that never issued it',
-      'Forging one takes',
-      'never reach the network',
-      'not an airworthiness system',
-    ]) {
-      assert.ok(about.includes(claim), `/about is missing: ${claim}`)
-    }
+    // What the page says is editorial and is not asserted here. It used to
+    // name the fraud, what makes forgery hard, what stays private, and that
+    // this is not an airworthiness system; the page now points at the blog
+    // post for all of it. Tying the test to particular sentences meant every
+    // rewrite of the copy was a failing build.
     // And it lights its own entry while you are on it.
     assert.match(about, /<a href="\/about" class="on">/)
   })
