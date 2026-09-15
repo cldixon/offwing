@@ -228,14 +228,12 @@ export function icon(name: string) {
  * subject and does not explain the problem.
  */
 export function aboutProse() {
-  return html`<h2>More info</h2>
+  return html`<p>
+    <strong>Offwing</strong> is a proof-of-concept application, addressing a real challenge in the aviation industry
+    with an AT Protocol implementation.</p>
 
     <p>
-      This application is a proof-of-concept demonstration of applying the AT Protocol to a real world use case beyond traditional socia media.
-    </p>
-
-    <p>
-      To learn more about the premise, the underlying technology and thoughts from the creator, please visit the accompanying <a href="https://cldixon.com/blog/offwing">blog post</a>.
+      To learn more, please read the accompanying <a href="https://cldixon.com/blog/offwing">blog post</a>.
     </p>`
 }
 
