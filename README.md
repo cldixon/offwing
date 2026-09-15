@@ -4,7 +4,10 @@
 
 **Offwing** is a demonstration of building on AT Protocol to solve interesting problems beyond social media apps.
 
-You can explore the [live app](https://offwing.cldixon.dev) to try it out and read the [blog post](https://cldixon.com/blog/offwing) for more background.
+You can explore the [live app](https://offwing.cldixon.dev) and read the [blog post](https://cldixon.com/blog/offwing) for more background.
+
+**Screenshot**
+![App screenshot](images/offwing-screenshot.png)
 
 ## The concept
 
@@ -40,6 +43,7 @@ flowchart LR
     REPOS -. "verify the organizations" .-> A
 ```
 
+For this demonstration, I aimed to actually test out the core concepts around separate PDS instances, multiple app views on the same data, and reading from the _firehose_. For instance, here is an example "self-hosted" PDS instance for one of the fictional organizations in the demo: [Northwind turbine PDS](https://northwind-turbine.f8130.cldixon.dev/)
 
 ## The lexicon
 
@@ -97,5 +101,7 @@ An important note here is that the _sensitive information_ included in an 8130 d
 | `completedAt` | 13e / 14e | claimed completion — attacker-controlled, compare against an observer's own clock |
 
 ## Conclusion
+
+Right as I was finishing working on this project, The alpha release of [At Proto Spaces](https://atproto.com/blog/atproto-spaces-alpha) was announced. So, I can see a very interesting Offwing v2 which utilizes the _permissioned data_ concept in very interesting ways. For instance, the sensitive and propietary parts of 8130 documents could be stored on the network, allowing for true digital records of these documents. Those fields would only be accessible by the sender and recipient to start, but could be made accessible to regulators, auditors, and in the future other entities who purchase the part secondarily.
 
 If you are interested in discussing this project, please reach out to me through my blog or GitHub.
