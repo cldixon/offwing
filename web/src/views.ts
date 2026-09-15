@@ -108,9 +108,6 @@ export function aboutPage(mode: Mode = 'live', chrome?: Chrome) {
     // The same words the navigation uses, as every other page here does.
     'More info',
     html`<h1>More info</h1>
-      <p class="sub">
-        A demonstration of 8130 records management using technology built for social apps.
-      </p>
       <div class="card pad">${aboutProse()}</div>`,
     mode,
     chrome,
