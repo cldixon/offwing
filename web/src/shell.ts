@@ -228,34 +228,11 @@ export function icon(name: string) {
  * subject and does not explain the problem.
  */
 export function aboutProse() {
-  return html`<h2>The problem</h2>
+  return html`<p><strong>Offwing</strong> is a proof-of-concept application addressing a real challenge in the aviation industry
+    with an AT Protocol implementation.</p>
+
     <p>
-      A part arrives in a crate with a certificate. The fraud that matters in
-      aviation parts is not somebody editing a shared record — it is a document
-      attributed to a real, reputable repair station that never issued it.
-    </p>
-    <h2>What this does about it</h2>
-    <p>
-      A station's handle is its own DNS-verified domain, and its records are
-      signed by keys in its own identity document. A release certificate counts
-      as real only when a matching record sits in that station's own
-      repository. Forging one takes the station's domain <em>and</em> its
-      signing key, not a PDF editor.
-    </p>
-    <h2>Without publishing the shop's business</h2>
-    <p>
-      What the shop did and what it found never reach the network. The public
-      record carries only what identifies the document, plus a single hash over
-      the whole of it; the rest travels with the part, exactly as paperwork does
-      today. Anyone can check who signed. Nobody learns what was done.
-    </p>
-    <h2>And none of it is real</h2>
-    <p>
-      Every organization, part number and certificate here is invented. This is
-      a demonstration of a protocol, not an airworthiness system, and a green
-      check on this site says a signature held — never that a part is safe to
-      fit. The <a href="https://github.com/cldixon/offwing">project README</a>
-      works the whole scheme through.
+      To learn more, please read the associated <a href="https://cldixon.com/blog/offwing">blog post</a> or visit the <a href="https://github.com/cldixon/offwing">GitHub repository</a>.
     </p>`
 }
 
@@ -461,7 +438,7 @@ const BUNDLES_SCRIPT = `
   // people's browsers, and a bundle cannot be reissued — the nonces are not
   // recoverable from the commitment — so changing it would silently orphan
   // every document anyone is holding.
-  var KEY = 'f8130.bundles' 
+  var KEY = 'f8130.bundles'
   function read() {
     try { return JSON.parse(localStorage.getItem(KEY) || '{}') } catch (e) { return {} }
   }
