@@ -230,6 +230,9 @@ export function icon(name: string) {
 export function aboutProse() {
   return html`<h2>The problem</h2>
     <p>
+      This is a test of me changing the text here........
+    </p>
+    <p>
       A part arrives in a crate with a certificate. The fraud that matters in
       aviation parts is not somebody editing a shared record — it is a document
       attributed to a real, reputable repair station that never issued it.
@@ -461,7 +464,7 @@ const BUNDLES_SCRIPT = `
   // people's browsers, and a bundle cannot be reissued — the nonces are not
   // recoverable from the commitment — so changing it would silently orphan
   // every document anyone is holding.
-  var KEY = 'f8130.bundles' 
+  var KEY = 'f8130.bundles'
   function read() {
     try { return JSON.parse(localStorage.getItem(KEY) || '{}') } catch (e) { return {} }
   }
