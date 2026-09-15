@@ -228,7 +228,7 @@ export function icon(name: string) {
  * subject and does not explain the problem.
  */
 export function aboutProse() {
-  return html`<p><strong>Offwing</strong> is a proof-of-concept addressing a real challenge in the aviation industry
+  return html`<p><strong>Offwing</strong> is a proof-of-concept application addressing a real challenge in the aviation industry
     with an AT Protocol implementation.</p>
 
     <p>
