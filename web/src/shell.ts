@@ -232,7 +232,7 @@ export function aboutProse() {
     with an AT Protocol implementation.</p>
 
     <p>
-      To learn more, please read the accompanying <a href="https://cldixon.com/blog/offwing">blog post</a> or visit the <a href="https://github.com/cldixon/offwing">GitHub repository</a>.
+      To learn more, please read the associated <a href="https://cldixon.com/blog/offwing">blog post</a> or visit the <a href="https://github.com/cldixon/offwing">GitHub repository</a>.
     </p>`
 }
 
