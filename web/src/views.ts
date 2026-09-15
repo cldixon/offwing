@@ -109,8 +109,7 @@ export function aboutPage(mode: Mode = 'live', chrome?: Chrome) {
     'More info',
     html`<h1>More info</h1>
       <p class="sub">
-        A demonstration of verifiable release certificates, and the problem
-        they exist to address.
+        A demonstration of 8130 records management using technology built for social apps.
       </p>
       <div class="card pad">${aboutProse()}</div>`,
     mode,
