@@ -13,13 +13,39 @@ config file instead, set once per service in Railway under
 
 | service | config file path | notes |
 |---|---|---|
-| `offwing-web` | `web/railway.json` | public; healthcheck `/api/health` |
+| `offwing-web` | `web/railway.json` | public; healthcheck `/api/health`; sleeps when idle |
 | `ingest` | `ingest/railway.json` | no public domain; restarts always |
 | `seed` | `seed/railway.json` | one-shot; watch patterns limited to `seed/**` |
-| `pds` | — | Docker image, not built from this repo |
+| `pds` | — | Docker image `ghcr.io/bluesky-social/pds`, pinned to a version |
 | `Postgres` | — | Railway template; the AppView's index |
 
 After that, pushes to the tracked branch deploy every service automatically.
+
+## Keeping the bill small
+
+Railway charges for memory held, not requests served, so an always-on
+container costs the same whether anyone visits or not. Two settings follow
+from that:
+
+- **The web service sleeps.** `sleepApplication` is set in `web/railway.json`
+  (config as code, so it wins over the dashboard). Railway puts it to sleep
+  after about ten minutes without outbound traffic and wakes it on the next
+  request, so the first visitor after a quiet spell waits a few seconds for
+  boot. It can sleep because nothing in it runs on a timer: the feed polls the
+  index only while a viewer holds the stream open, the page closes that stream
+  when its tab goes idle or hidden, and the synthetic generator stops with the
+  last viewer. Keep it that way — a background interval in the web process
+  would keep it awake around the clock.
+- **The PDS, ingest and Postgres cannot sleep.** The firehose is only a
+  firehose if something is listening, and a PDS must answer identity lookups at
+  any hour. They are the floor.
+
+The PDS image is pinned to a release tag rather than `latest`, so a restart
+never upgrades it unannounced. To upgrade, pick the newest numbered tag from
+the [package page](https://github.com/bluesky-social/pds/pkgs/container/pds),
+read the release notes, and change the service's image in Railway. Back up the
+`pds` volume first: it holds every organization's signing keys, and the
+`did:plc` registrations they control are permanent.
 
 ## Variables
 
