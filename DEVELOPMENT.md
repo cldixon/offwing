@@ -134,7 +134,7 @@ switched between them.
 | `commitment/` | Go implementation of the same commitment scheme |
 | `ingest/`, `cmd/ingest/` | firehose consumer, signature verification, Postgres index; `run` and `reindex` |
 | `web/` | AppView A |
-| `watchdog/` | AppView B |
+| `watchdog/` | AppView B — optional, not in the default deployment |
 | `seed/` | one-shot job: 29 organizations and the set pieces |
 | `spike/` | validation that the atproto verification primitives hold up |
 | `testdata/vectors.json` | the cross-language contract |

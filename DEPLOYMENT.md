@@ -15,11 +15,9 @@ config file instead, set once per service in Railway under
 |---|---|---|
 | `offwing-web` | `web/railway.json` | public; healthcheck `/api/health` |
 | `ingest` | `ingest/railway.json` | no public domain; restarts always |
-| `watchdog` | `watchdog/railway.json` | public; AppView B |
-| `watchdog-ingest` | `ingest/railway.json` | AppView B's own consumer |
 | `seed` | `seed/railway.json` | one-shot; watch patterns limited to `seed/**` |
 | `pds` | — | Docker image, not built from this repo |
-| `Postgres` / `Postgres-8BEk` | — | Railway templates, one index each |
+| `Postgres` | — | Railway template; the AppView's index |
 
 After that, pushes to the tracked branch deploy every service automatically.
 
@@ -37,7 +35,6 @@ The web service comes up correct with none set. The others need:
 | web | `SEED_ACCOUNT_PASSWORD` | the demonstration accounts' password, for signing |
 | web | `ANTHROPIC_API_KEY` | optional; narrates Blocks 7 and 12 |
 | web | `F8130_ACTIVITY` | `1` to run the generator in live mode |
-| watchdog-ingest | `PDS_HOST` | `wss://f8130.cldixon.dev` — the **public** firehose, on purpose |
 
 `F8130_MODE=live` is a request rather than a guarantee. The web service probes
 `PDS_INTERNAL_URL` at boot and runs the self-contained demonstration if nothing
@@ -48,6 +45,36 @@ without the `pds` service.
 
 Railway's private network is IPv6-only and is **not** TLS-terminated, hence
 `ws://` and `.railway.internal` rather than `wss://` and a public hostname.
+
+## Optional: AppView B, the watchdog
+
+The default deployment runs one AppView. The second, `watchdog/`, is kept in
+the repository, built and tested in CI, but not deployed, because it is three
+more always-on containers (the app, its own firehose consumer and its own
+Postgres) for a demonstration whose bill is mostly idle memory. Nothing else
+depends on it: the web app never calls it. The synthetic generator still
+plants its suspicious records; without the watchdog there is simply no second
+observer flagging them.
+
+To bring it back, add three services:
+
+| service | config file path | notes |
+|---|---|---|
+| `watchdog` | `watchdog/railway.json` | public; healthcheck `/health` |
+| `watchdog-ingest` | `ingest/railway.json` | AppView B's own consumer |
+| a second Postgres | — | Railway template; AppView B's own index |
+
+| service | variable | value |
+|---|---|---|
+| watchdog | `DATABASE_URL` | the second Postgres's `DATABASE_URL` |
+| watchdog | `PEER_APPVIEW_URL` | optional; the main AppView's public URL, linked from its pages |
+| watchdog-ingest | `DATABASE_URL` | the second Postgres's `DATABASE_URL` |
+| watchdog-ingest | `PDS_HOST` | `wss://f8130.cldixon.dev` — the **public** firehose, on purpose |
+
+Keep the second index in its own database. An observer that shares the main
+AppView's index is not independent, which is the whole reason it exists. The
+index is derived, so a fresh database fills itself from the firehose; it does
+not need to be restored.
 
 ## Manual steps
 
@@ -103,5 +130,6 @@ fetches a missing one directly over `com.atproto.sync.getRecord` — verified
 against the repository's signed commit, not taken on the server's word — so a
 rebuilt index repairs its own display names without a re-seed.
 
-Re-seeding rewrites the log, so both AppView indexes should be rebuilt
-afterwards rather than left holding records whose URIs no longer exist.
+Re-seeding rewrites the log, so every AppView index (both, if the watchdog is
+deployed) should be rebuilt afterwards rather than left holding records whose
+URIs no longer exist.
