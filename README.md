@@ -35,15 +35,17 @@ flowchart LR
 
     A["offwing: Main AppView<br/>at offwing.cldixon.dev"]
 
-    B["watchdog: AppView focused on fraud detection"]
+    B["watchdog (optional): AppView focused on fraud detection"]
 
     REPOS --> FH
     FH --> A
-    FH --> B
+    FH -.-> B
     REPOS -. "verify the organizations" .-> A
 ```
 
 For this demonstration, I aimed to actually test out the core concepts around separate PDS instances, multiple app views on the same data, and reading from the _firehose_. For instance, here is an example "self-hosted" PDS instance for one of the fictional organizations in the demo: [Northwind turbine PDS](https://northwind-turbine.f8130.cldixon.dev/)
+
+The second AppView, `watchdog`, is optional and not part of the hosted deployment, to keep the demo's running cost down. Its code stays in [`watchdog/`](watchdog/) and it can be deployed alongside the main AppView at any time; see [DEPLOYMENT.md](DEPLOYMENT.md#optional-appview-b-the-watchdog).
 
 ## The lexicon
 

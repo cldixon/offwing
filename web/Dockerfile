@@ -8,7 +8,7 @@
 # There is no compile step: @f8130/core is consumed as raw TypeScript and run
 # through tsx, so the image ships sources and a production dependency tree.
 
-FROM node:22-slim
+FROM node:24-slim
 
 WORKDIR /app
 ENV NODE_ENV=production
