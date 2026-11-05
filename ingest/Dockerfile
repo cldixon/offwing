@@ -4,7 +4,7 @@
 # module and a Node workspace side by side, and build detection picks whichever
 # it finds first.
 
-FROM golang:1.26 AS build
+FROM golang:1.27 AS build
 
 WORKDIR /src
 COPY go.mod go.sum ./

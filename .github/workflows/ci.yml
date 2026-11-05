@@ -27,7 +27,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '24'
           cache: npm
       - run: npm ci
       - run: npm run typecheck --workspaces --if-present
@@ -55,7 +55,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
-          go-version: '1.26'
+          go-version: '1.27'
           cache: true
       - run: gofmt -l . | tee /dev/stderr | (! read)
         name: gofmt
@@ -65,6 +65,12 @@ jobs:
           # Without this the database tests skip rather than fail, so CI would
           # go green having never exercised the index.
           F8130_TEST_DSN: postgres://postgres:postgres@localhost:5432/f8130_test?sslmode=disable
+      - run: go run golang.org/x/vuln/cmd/govulncheck@latest ./...
+        name: govulncheck
+        # Fails only on vulnerabilities the code can actually reach, in the
+        # dependencies or in the standard library of the Go that built it.
+        # The October 2026 crypto/x509 fix (GO-2026-6809) shipped in a patch
+        # release; this is what would have said so.
 
   cross-language:
     runs-on: ubuntu-latest
@@ -72,11 +78,11 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '24'
           cache: npm
       - uses: actions/setup-go@v5
         with:
-          go-version: '1.26'
+          go-version: '1.27'
           cache: true
       - run: npm ci
       # Regenerating the vectors must be a no-op. If this diff is non-empty,

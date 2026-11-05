@@ -1,7 +1,7 @@
 # Development
 
-Everything here runs from a fresh clone with nothing installed but Node 22 and
-(for the Go core and the ingest) Go 1.26. No PDS, no database, no keys.
+Everything here runs from a fresh clone with nothing installed but Node 24 and
+(for the Go core and the ingest) Go 1.27. No PDS, no database, no keys.
 
 ## Run it
 

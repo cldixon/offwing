@@ -47,6 +47,22 @@ read the release notes, and change the service's image in Railway. Back up the
 `pds` volume first: it holds every organization's signing keys, and the
 `did:plc` registrations they control are permanent.
 
+## Staying patched
+
+The base images track a release line, not a patch: `golang:1.27` for the
+ingest build and `node:24-slim` for the Node services. Every deploy rebuilds
+on the newest patch of that line, so a security release reaches production
+the next time the service builds, without a commit. A service that has not
+been rebuilt is still running whatever it was built with, so after a security
+release, redeploy rather than wait for an unrelated push.
+
+The October 2026 `crypto/x509` fix (GO-2026-6809, in Go 1.26.10 and 1.27.3)
+was exactly that case: a patch release, invisible to anything but a rebuild.
+CI now runs `govulncheck`, which fails on a vulnerability the code can reach,
+including one in the standard library of the Go that built it.
+
+The PDS image is the exception and is pinned; see above.
+
 ## Variables
 
 The web service comes up correct with none set. The others need:
